@@ -1,0 +1,33 @@
+# Build artifacts
+claude-code/pet/clippy-pet
+*.o
+*.a
+*.dylib
+
+# Secrets (should already be placeholders, but guard against accidental commits)
+*.key
+*.pem
+*.env
+.env.local
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# User-specific runtime data
+*.log
+*.db
+*.sqlite
+*.sqlite3
+
+# Claude Code runtime files (not config)
+sessions/
+history.jsonl
+paste-cache/
+cache/
+
+# Pet assets (user must provide spritesheet due to copyright)
+claude-code/pet/assets/spritesheet.webp
+claude-code/pet/assets/frames/*.png
+!claude-code/pet/assets/frames/.gitkeep
