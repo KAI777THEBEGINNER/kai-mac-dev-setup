@@ -7,6 +7,7 @@
 | 目录 | 说明 |
 |------|------|
 | `ghostty/` | Ghostty 终端配置 + 复古星空 / CRT / 光标尾迹 Shader |
+| `zellij/` | Zellij 终端复用器配置（Ghostty 启动 zsh 后自动进入）|
 | `claude-code/CLAUCE.md` | 我的 Claude Code 全局行为约定 |
 | `claude-code/settings.json` | Claude Code 主配置（已脱敏，需自行填入 API token） |
 | `claude-code/settings.local.json` | 本地权限白名单 |

@@ -27,6 +27,16 @@ cp "$REPO_DIR/ghostty/shaders/"*.glsl "$HOME/.config/ghostty/custom_shader/"
 mkdir -p "$HOME/.config/ghostty/shaders"
 cp "$REPO_DIR/ghostty/shaders/shader.glsl" "$HOME/.config/ghostty/shaders/shader.glsl"
 
+# --- Zellij ---
+if [ -f "$HOME/.config/zellij/config.kdl" ]; then
+    echo "Backing up existing Zellij config..."
+    cp "$HOME/.config/zellij/config.kdl" "$BACKUP_DIR/zellij-config.kdl"
+fi
+
+echo "Installing Zellij config..."
+mkdir -p "$HOME/.config/zellij"
+cp "$REPO_DIR/zellij/config.kdl" "$HOME/.config/zellij/config.kdl"
+
 # --- Claude Code ---
 mkdir -p "$HOME/.claude"
 

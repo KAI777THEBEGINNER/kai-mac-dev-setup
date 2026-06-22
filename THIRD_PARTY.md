@@ -7,6 +7,7 @@
 | 项目 | 仓库 | 许可证 | 用途 |
 |------|------|--------|------|
 | Ghostty | https://github.com/ghostty-org/ghostty | MPL-2.0 | 终端模拟器 |
+| Zellij | https://github.com/zellij-org/zellij | MIT | 终端复用器（ multiplexer ） |
 | Claude Code | https://github.com/anthropics/claude-code | 专有 / 服务条款 | Anthropic 官方 CLI 助手 |
 | CC Switch | https://github.com/farion1231/cc-switch | 见仓库 | Claude Code 多账号 / 多模型切换 GUI |
 
