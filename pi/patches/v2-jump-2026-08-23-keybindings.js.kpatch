@@ -1,0 +1,15 @@
+--- tui-pkg/package/dist/keybindings.js	1985-10-26 16:15:00
++++ /Users/zhaoziqi/.npm-global/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui/dist/keybindings.js	2026-08-23 19:01:08
+@@ -120,6 +120,12 @@
+         defaultKeys: "ctrl+shift+down",
+         description: "Jump to next semantic prompt",
+     },
++    // KAI-PATCH: macOS 没有 End 键，用 shift+up 一键跳回最新一条用户输入
++    // （Claude Code 同款手势）。
++    "tui.altScreen.latestInput": {
++        defaultKeys: "shift+up",
++        description: "Jump to the latest user input",
++    },
+     "tui.altScreen.search": {
+         defaultKeys: "ctrl+shift+f",
+         description: "Search the primary scroll view",

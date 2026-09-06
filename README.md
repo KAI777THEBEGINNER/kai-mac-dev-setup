@@ -1,6 +1,6 @@
 # Kai's macOS Dev Setup
 
-本仓库汇总了我在 macOS 上使用的 Ghostty 终端配置与 Claude Code 个性化配置（不含 memory）。
+本仓库汇总了我在 macOS 上使用的 Ghostty 终端配置、Claude Code 个性化配置与 pi coding agent 配置（不含 memory 与 auth）。
 
 ## 包含内容
 
@@ -16,6 +16,7 @@
 | `claude-code/backup/` | 配置自动消毒与恢复脚本 |
 | `claude-code/pet/` | 桌面 Clippy 宠物源码（需自备 spritesheet） |
 | `claude-code/statusline-preset` | Claude Code 终端状态栏预设 |
+| `pi/` | [pi coding agent](https://github.com/badlogic/pi-mono) 配置：AGENTS.md、settings.json、models.json、自定义 skills / agents / extensions / scripts / patches（**不含 auth.json 与 memory/**，需在新机器上重新登录） |
 
 ## 快速安装
 

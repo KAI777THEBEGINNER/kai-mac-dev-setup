@@ -1,5 +1,5 @@
 #!/bin/bash
-# Install Kai's macOS dev setup (Ghostty + Claude Code personalization).
+# Install Kai's macOS dev setup (Ghostty + Zellij + Claude Code + Pi agent).
 # Usage: bash install.sh
 
 set -e
@@ -65,6 +65,27 @@ mkdir -p "$HOME/.claude/statusbar"
 cp "$REPO_DIR/claude-code/statusbar/"*.js "$HOME/.claude/statusbar/"
 cp "$REPO_DIR/claude-code/statusbar/"*.sh "$HOME/.claude/statusbar/"
 chmod +x "$HOME/.claude/statusbar/watcher.sh"
+
+# --- Pi coding agent ---
+PI_DIR="$HOME/.pi/agent"
+mkdir -p "$PI_DIR"
+
+for f in AGENTS.md USER-GUIDE.md pi-customizations.md pi-dsh-minimal.json settings.json keybindings.json models.json models-store.json; do
+    if [ -f "$PI_DIR/$f" ]; then
+        cp "$PI_DIR/$f" "$BACKUP_DIR/pi-$f"
+    fi
+    cp "$REPO_DIR/pi/$f" "$PI_DIR/$f"
+done
+
+for d in agents extensions patches scripts skills; do
+    if [ -d "$PI_DIR/$d" ]; then
+        cp -R "$PI_DIR/$d" "$BACKUP_DIR/pi-$d"
+    fi
+    cp -R "$REPO_DIR/pi/$d/." "$PI_DIR/$d/"
+done
+
+echo "Pi agent config installed."
+echo "⚠️  auth.json 不会从仓库安装。如为全新机器，运行 pi 后按提示重新登录。"
 
 # Backup / sanitize scripts
 mkdir -p "$HOME/.claude/backup"

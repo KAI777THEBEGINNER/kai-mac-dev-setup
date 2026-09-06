@@ -1,0 +1,22 @@
+--- package/dist/modes/interactive/components/assistant-message.js	1985-10-26 16:15:00
++++ /Users/zhaoziqi/.npm-global/lib/node_modules/@earendil-works/pi-coding-agent/dist/modes/interactive/components/assistant-message.js	2026-08-23 19:01:00
+@@ -57,11 +57,17 @@
+     }
+     render(width) {
+         const lines = super.render(width);
+-        if (this.hasToolCalls || lines.length === 0) {
++        if (lines.length === 0) {
+             return lines;
+         }
++        // KAI-PATCH: 带工具调用的 assistant 消息也打上 OSC133_A 跳转标记。
++        // 原版这里在 hasToolCalls 时直接返回，导致这类消息不可被
++        // ctrl+shift+down（nextPrompt）定位，长会话里「下」完全失效。
++        // 只补行首标记；B/C 收尾仍只用于无工具调用的消息，保持原行为。
+         lines[0] = OSC133_ZONE_START + lines[0];
+-        lines[lines.length - 1] = OSC133_ZONE_END + OSC133_ZONE_FINAL + lines[lines.length - 1];
++        if (!this.hasToolCalls) {
++            lines[lines.length - 1] = OSC133_ZONE_END + OSC133_ZONE_FINAL + lines[lines.length - 1];
++        }
+         return lines;
+     }
+     updateContent(message, isStreaming = this.isStreaming) {

@@ -1,0 +1,401 @@
+{
+  "name": "agent-webbridge",
+  "version": "v0.1.0-agent",
+  "description": "本地浏览器自动化桥接：通过本机 HTTP 接口驾驶用户自己的 Chrome（带真实登录态）。",
+  "transport": {
+    "type": "http",
+    "endpoint": "http://127.0.0.1:10086/command",
+    "method": "POST",
+    "content_type": "application/json",
+    "request": {
+      "action": "<工具名>",
+      "args": {},
+      "session": "<任务名>"
+    },
+    "response": {
+      "ok": true,
+      "data": {}
+    },
+    "error": {
+      "ok": false,
+      "error": {
+        "code": "<错误码>",
+        "message": "<说明>"
+      }
+    },
+    "error_codes": [
+      "bad_request",
+      "tool_error",
+      "extension_error",
+      "timeout",
+      "internal_error",
+      "forbidden",
+      "not_found"
+    ],
+    "status_code_note": "tool errors return HTTP 200 with ok:false; only malformed requests return 400"
+  },
+  "telemetry": "disabled",
+  "tools": [
+    {
+      "name": "navigate",
+      "description": "在浏览器里打开 URL。首次调用会为该 session 建标签组；newTab=true 时新开标签，否则复用当前标签。",
+      "returns": "{success, url, tabId}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "要打开的完整 URL"
+          },
+          "newTab": {
+            "type": "boolean",
+            "description": "是否新开标签页",
+            "default": false
+          },
+          "group_title": {
+            "type": "string",
+            "description": "标签组的可见名称，只在本 session 第一次 navigate 时设置"
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    },
+    {
+      "name": "find_tab",
+      "description": "重新选中本 session 之前开过的标签作为当前标签。url 必填（active=true 时也要传，按 hostname 匹配用户正在看的前台标签，就地操作、不并入标签组）。",
+      "returns": "{success, url, tabId, borrowed}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "目标标签的完整 URL，取自 list_tabs 或此前 navigate 的返回；根域名可能匹配不到 www 子域，尽量给精确 URL"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "借用用户当前正在查看的标签",
+            "default": false
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    },
+    {
+      "name": "snapshot",
+      "description": "读取当前标签的无障碍树（文本），交互元素带 @e 引用。读页面内容、定位元素都用它，优先于手写 CSS 选择器。",
+      "returns": "{url, title, tree}（tree 里交互元素带 @e ref）",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "click",
+      "description": "点击元素（DOM 层 el.click()）。selector 可以是 snapshot 给的 @e 引用或 CSS 选择器。",
+      "returns": "{success, tag, text}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "selector": {
+            "type": "string",
+            "description": "@e 引用或 CSS 选择器"
+          }
+        },
+        "required": [
+          "selector"
+        ]
+      }
+    },
+    {
+      "name": "mouse_click",
+      "description": "按元素真实坐标派发鼠标事件（Input.dispatchMouseEvent）。页面校验事件可信度、或 click 无效时用它。",
+      "returns": "{success, x, y, tag, text}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "selector": {
+            "type": "string",
+            "description": "@e 引用或 CSS 选择器"
+          }
+        },
+        "required": [
+          "selector"
+        ]
+      }
+    },
+    {
+      "name": "fill",
+      "description": "填入文本，先清空再插入。支持 input/textarea，也支持 contenteditable 富文本编辑器（ProseMirror / Lexical / Slate 等），会派发正确的输入事件。",
+      "returns": "{success, tag, mode}（mode 为 value 或 contenteditable）",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "selector": {
+            "type": "string",
+            "description": "@e 引用或 CSS 选择器"
+          },
+          "value": {
+            "type": "string",
+            "description": "要填入的文本"
+          }
+        },
+        "required": [
+          "selector",
+          "value"
+        ]
+      }
+    },
+    {
+      "name": "evaluate",
+      "description": "在页面 JS 环境里执行代码并返回结果，支持 async/await。同一页面多次调用共享同一 realm，重复声明 const/let 会报错，用 IIFE 包一层。",
+      "returns": "{type, value}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "要执行的 JavaScript 表达式或语句块"
+          }
+        },
+        "required": [
+          "code"
+        ]
+      }
+    },
+    {
+      "name": "key_type",
+      "description": "向当前焦点元素插入文本（Input.insertText，一次性插入，不派发逐字符按键事件）。页面依赖真实按键才有反应时用 send_keys。",
+      "returns": "{success, length}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "要输入的文本"
+          }
+        },
+        "required": [
+          "text"
+        ]
+      }
+    },
+    {
+      "name": "send_keys",
+      "description": "发送按键组合，如 Enter、Escape、Mod+A（Mod 在 macOS 为 Cmd，其他平台为 Ctrl）。",
+      "returns": "{success, dispatched, os}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "keys": {
+            "type": "string",
+            "description": "按键描述，如 'Enter'、'Mod+A'、'Shift+Tab'；空格分隔可连发多个"
+          },
+          "repeat": {
+            "type": "integer",
+            "description": "重复次数，整数 [1,100]",
+            "minimum": 1,
+            "maximum": 100,
+            "default": 1
+          }
+        },
+        "required": [
+          "keys"
+        ]
+      }
+    },
+    {
+      "name": "screenshot",
+      "description": "截图并落盘，返回文件路径而非 base64（模型读不了裸二进制）。默认截可视区域，传 selector 则按该元素的 box 裁剪（会先滚动到元素）。拿到 path 后用文件读取工具打开看图。",
+      "returns": "{format, path, sizeBytes, mimeType}（已落盘，path 是本地文件）",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "format": {
+            "type": "string",
+            "description": "png 或 jpeg",
+            "enum": [
+              "png",
+              "jpeg"
+            ],
+            "default": "png"
+          },
+          "quality": {
+            "type": "integer",
+            "description": "jpeg 质量 0-100",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "selector": {
+            "type": "string",
+            "description": "只截该元素，@e 引用或 CSS 选择器；省略则截当前可视区域（无整页截图能力）"
+          },
+          "path": {
+            "type": "string",
+            "description": "自定义输出路径，父目录自动创建、同名覆盖；省略则由 daemon 选临时路径"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "save_as_pdf",
+      "description": "把当前页面渲染为 PDF 并落盘，返回文件路径。解码后上限 100MB。",
+      "returns": "{path, sizeBytes, mimeType, pageTitle}（已落盘）",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "paper_format": {
+            "type": "string",
+            "description": "纸张规格",
+            "enum": [
+              "letter",
+              "a4",
+              "legal",
+              "a3",
+              "tabloid"
+            ],
+            "default": "letter"
+          },
+          "landscape": {
+            "type": "boolean",
+            "description": "横向",
+            "default": false
+          },
+          "scale": {
+            "type": "number",
+            "description": "缩放，范围 0.1-2.0（越界报错）",
+            "minimum": 0.1,
+            "maximum": 2.0,
+            "default": 1.0
+          },
+          "print_background": {
+            "type": "boolean",
+            "description": "保留背景色",
+            "default": true
+          },
+          "path": {
+            "type": "string",
+            "description": "自定义输出路径；省略则按页面标题落到临时目录"
+          },
+          "file_name": {
+            "type": "string",
+            "description": "只指定文件名（不含目录），由 daemon 落到临时目录；与 path 二选一"
+          }
+        },
+        "required": []
+      }
+    },
+    {
+      "name": "network",
+      "description": "抓当前标签的网络请求：start 开始录制、list 列请求、detail 看某条的响应体、stop 停止。",
+      "returns": "start/stop 返回状态；list 返回 {count, requests[]}；detail 返回该请求的响应详情",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "cmd": {
+            "type": "string",
+            "description": "操作",
+            "enum": [
+              "start",
+              "stop",
+              "list",
+              "detail"
+            ]
+          },
+          "filter": {
+            "type": "string",
+            "description": "URL 过滤子串，配合 list 使用"
+          },
+          "requestId": {
+            "type": "string",
+            "description": "请求 ID，配合 detail 使用，取自 list 返回"
+          }
+        },
+        "required": [
+          "cmd"
+        ]
+      }
+    },
+    {
+      "name": "upload",
+      "description": "给页面的 file input 塞本地文件。",
+      "returns": "{success, selector, fileCount, files}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "selector": {
+            "type": "string",
+            "description": "file input 的 CSS 选择器（走 DOM.querySelector，不支持 @e 引用）"
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "本地文件绝对路径列表"
+          }
+        },
+        "required": [
+          "selector",
+          "files"
+        ]
+      }
+    },
+    {
+      "name": "cdp",
+      "description": "原始 Chrome DevTools Protocol 直通，上面工具覆盖不到时的兜底。注意：作用在 tab target 上，不支持 Browser.* 域。",
+      "returns": "CDP 原始响应对象（非对象结果包成 {value}）",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "description": "CDP 方法名，如 'Page.getLayoutMetrics'"
+          },
+          "params": {
+            "type": "object",
+            "description": "CDP 方法参数"
+          }
+        },
+        "required": [
+          "method"
+        ]
+      }
+    },
+    {
+      "name": "list_tabs",
+      "description": "列出本 session 开过的标签（tabId / url / title / active / groupTitle）。",
+      "returns": "{success, tabs:[{tabId, url, title, active, groupTitle}]}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "close_tab",
+      "description": "关闭本 session 的当前标签。",
+      "returns": "{success, closed, reason?}",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "name": "close_session",
+      "description": "关闭本 session 开过的所有标签（整组清掉）。只在用户明确要求关标签时调用。",
+      "returns": "{success, closed}（closed 是关掉的标签数）",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  ]
+}

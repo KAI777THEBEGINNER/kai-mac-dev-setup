@@ -1,0 +1,81 @@
+--- tui-pkg/package/dist/tui-alt-screen.js	1985-10-26 16:15:00
++++ /Users/zhaoziqi/.npm-global/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui/dist/tui-alt-screen.js	2026-08-23 19:04:17
+@@ -20,6 +20,11 @@
+ const END_SYNCHRONIZED_OUTPUT = "\x1b[?2026l";
+ const OSC133_ZONE_PREFIX = /^(?:\x1b\]133;[ABC](?:\x07|\x1b\\))+/;
+ const OSC133_PROMPT_START = /^\x1b\]133;A(?:\x07|\x1b\\)/;
++// KAI-PATCH: 用户消息专属标记（interactive-mode 的 UserMessageComponent 发出），
++// 行首是 OSC133_A 提示标记，用户标记紧随其后。用于 shift+up 跳最新一条 input。
++const KAI_USER_MARKER = /^(?:\x1b\]133;A(?:\x07|\x1b\\))\x1b\]7777;pi-user\x07/;
++// KAI-PATCH: 退出 alt screen 回写 scrollback 时清除用户标记（终端不可见但保持干净）。
++const KAI_USER_MARKER_STRIP = /\x1b\]7777;pi-user\x07/g;
+ const PAGE_SCROLL_OVERLAP = 4;
+ const MAX_CACHED_OFFSCREEN_KITTY_IMAGES = 16;
+ const MAX_CACHED_OFFSCREEN_KITTY_TRANSMISSION_BYTES = 32 * 1024 * 1024;
+@@ -163,7 +168,7 @@
+         }
+         else {
+             const width = Math.max(1, this.terminal.columns);
+-            const documentLines = this.render(width).map((line) => line.replace(OSC133_ZONE_PREFIX, ""));
++            const documentLines = this.render(width).map((line) => line.replace(OSC133_ZONE_PREFIX, "").replace(KAI_USER_MARKER_STRIP, ""));
+             this.lastDocument = this.applyLineResets(documentLines.map((line) => line.replaceAll(CURSOR_MARKER, ""))).map((line) => (isImageLine(line) || visibleWidth(line) <= width ? line : sliceByColumn(line, 0, width, true)));
+             let buffer = `${BEGIN_SYNCHRONIZED_OUTPUT}${EXIT_ALT_SCREEN}${DISABLE_AUTOWRAP}`;
+             for (let row = 0; row < this.lastDocument.length; row++) {
+@@ -261,7 +266,35 @@
+             this.requestRender();
+             return;
+         }
++        // KAI-PATCH: 向下找不到标记时兜底回到底部，避免「下」按键完全无反应。
++        if (direction > 0) {
++            scrollView.scrollToEnd();
++            this.requestRender();
++        }
+     }
++    // KAI-PATCH: 直接跳到「最新一条」用户输入（shift+up 用），
++    // 从渲染内容末尾往前找第一条用户消息标记，找不到则回到底部。
++    scrollToLatestInput() {
++        if (!this.currentLayout)
++            return;
++        const scrollView = this.getPrimaryScrollView();
++        const lines = getScrollViewBox(this.currentLayout, scrollView)?.scrollContentLines;
++        if (!lines) {
++            scrollView.scrollToEnd();
++            this.requestRender();
++            return;
++        }
++        for (let row = lines.length - 1; row >= 0; row--) {
++            if (!KAI_USER_MARKER.test(lines[row] ?? ""))
++                continue;
++            // KAI-PATCH: 落点补偿 -2 行（视口与内容行有 2 行偏移），保证消息文本可见。
++            scrollView.scrollTo(Math.max(0, row - 2));
++            this.requestRender();
++            return;
++        }
++        scrollView.scrollToEnd();
++        this.requestRender();
++    }
+     openSearch() {
+         if (this.activeSearch) {
+             this.activeSearch.overlay?.focus();
+@@ -487,6 +520,12 @@
+         if (keybindings.matches(data, "tui.altScreen.nextPrompt")) {
+             if (!isRelease)
+                 this.scrollToPrompt(1);
++            return { consume: true };
++        }
++        // KAI-PATCH: shift+up 一键跳回最新一条用户输入（macOS 无 End 键的替代）。
++        if (keybindings.matches(data, "tui.altScreen.latestInput")) {
++            if (!isRelease)
++                this.scrollToLatestInput();
+             return { consume: true };
+         }
+         if (keybindings.matches(data, "tui.altScreen.top")) {
+@@ -1086,7 +1125,7 @@
+         if (this.refreshSearch(nextLayout)) {
+             nextLayout = renderLayoutFrame(root, width, height, () => this.requestRender());
+         }
+-        let screen = nextLayout.lines.map((line) => line.replace(OSC133_ZONE_PREFIX, ""));
++        let screen = nextLayout.lines.map((line) => line.replace(OSC133_ZONE_PREFIX, "").replace(KAI_USER_MARKER_STRIP, ""));
+         screen = this.applySearchHighlights(screen, nextLayout);
+         screen = this.compositeOverlays(screen, width, height);
+         if (screen.length > height)

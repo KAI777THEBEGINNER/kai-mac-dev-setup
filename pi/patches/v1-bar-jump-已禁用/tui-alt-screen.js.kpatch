@@ -1,0 +1,48 @@
+--- tui-pkg/package/dist/tui-alt-screen.js	1985-10-26 16:15:00
++++ /Users/zhaoziqi/.npm-global/lib/node_modules/@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-tui/dist/tui-alt-screen.js	2026-08-16 20:42:17
+@@ -20,6 +20,9 @@
+ const END_SYNCHRONIZED_OUTPUT = "\x1b[?2026l";
+ const OSC133_ZONE_PREFIX = /^(?:\x1b\]133;[ABC](?:\x07|\x1b\\))+/;
+ const OSC133_PROMPT_START = /^\x1b\]133;A(?:\x07|\x1b\\)/;
++// KAI-PATCH: 用户消息专属标记（interactive-mode 的 UserMessageComponent 发出）
++// 行首是 OSC133_A 提示标记，用户标记紧随其后
++const KAI_USER_MARKER = /^(?:\x1b\]133;A(?:\x07|\x1b\\))\x1b\]7777;kai-user\x07/;
+ const PAGE_SCROLL_OVERLAP = 4;
+ const MAX_CACHED_OFFSCREEN_KITTY_IMAGES = 16;
+ const MAX_CACHED_OFFSCREEN_KITTY_TRANSMISSION_BYTES = 32 * 1024 * 1024;
+@@ -255,13 +258,33 @@
+         if (!lines)
+             return;
+         for (let row = scrollView.scrollTop + direction; row >= 0 && row < lines.length; row += direction) {
+-            if (!OSC133_PROMPT_START.test(lines[row] ?? ""))
++            // KAI-PATCH: 只匹配用户消息标记（而非回合边界），实现「在历史消息间跳转」
++            if (!KAI_USER_MARKER.test(lines[row] ?? ""))
+                 continue;
+-            scrollView.scrollTo(row);
++            // KAI-PATCH: 落点补偿 -2 行（视口与内容行有 2 行偏移），保证消息文本可见
++            scrollView.scrollTo(Math.max(0, row - 2));
+             this.requestRender();
+             return;
+         }
+     }
++    // KAI-PATCH: 直接跳到「最后一条」用户消息（提示栏点击用），
++    // 从渲染内容末尾往前扫第一个用户消息标记。
++    scrollToLastPrompt() {
++        if (!this.currentLayout)
++            return;
++        const scrollView = this.getPrimaryScrollView();
++        const lines = getScrollViewBox(this.currentLayout, scrollView)?.scrollContentLines;
++        if (!lines)
++            return;
++        for (let row = lines.length - 1; row >= 0; row--) {
++            if (!KAI_USER_MARKER.test(lines[row] ?? ""))
++                continue;
++            // KAI-PATCH: 落点补偿 -2 行，保证用户消息文本出现在视口内
++            scrollView.scrollTo(Math.max(0, row - 2));
++            this.requestRender();
++            return;
++        }
++    }
+     openSearch() {
+         if (this.activeSearch) {
+             this.activeSearch.overlay?.focus();

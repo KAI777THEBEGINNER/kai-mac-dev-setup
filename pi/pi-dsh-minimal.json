@@ -1,0 +1,10 @@
+{
+  "enabled": true,
+  "statusLine": true,
+  "useOnAllModels": false,
+  "modelPatterns": [
+    "deepseek-v4-pro",
+    "deepseek-v4-flash"
+  ],
+  "promoteOn": "either"
+}

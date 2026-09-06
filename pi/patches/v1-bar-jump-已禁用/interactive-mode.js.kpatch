@@ -1,0 +1,131 @@
+--- package/dist/modes/interactive/interactive-mode.js	1985-10-26 16:15:00
++++ /Users/zhaoziqi/.npm-global/lib/node_modules/@earendil-works/pi-coding-agent/dist/modes/interactive/interactive-mode.js	2026-08-16 20:49:54
+@@ -7,7 +7,7 @@
+ import * as os from "node:os";
+ import * as path from "node:path";
+ import * as TuiLayouts from "@earendil-works/pi-tui";
+-import { CombinedAutocompleteProvider, Container, fuzzyFilter, getCapabilities, hyperlink, Markdown, matchesKey, ProcessTerminal, Spacer, setKeybindings, Text, TruncatedText, TuiAltScreen, TuiMainScreen, visibleWidth, } from "@earendil-works/pi-tui";
++import { CombinedAutocompleteProvider, Container, fuzzyFilter, getCapabilities, hyperlink, Markdown, matchesKey, ProcessTerminal, Spacer, setKeybindings, Text, TruncatedText, truncateToWidth, TuiAltScreen, TuiMainScreen, visibleWidth, } from "@earendil-works/pi-tui";
+ import chalk from "chalk";
+ import { spawn, spawnSync } from "child_process";
+ import { APP_NAME, APP_TITLE, CONFIG_DIR_NAME, getAgentDir, getAuthPath, getDebugLogPath, getDocsPath, getShareViewerUrl, VERSION, } from "../../config.js";
+@@ -166,6 +166,10 @@
+     const authTypes = provider.authTypes.map(formatAuthSelectorProviderType).join("/");
+     return provider.name === provider.id ? authTypes : `${provider.name} · ${authTypes}`;
+ }
++// KAI-PATCH: pi-jump:// 内部链接处理器，供「上一条 prompt」提示栏的点击跳转使用。
++// 点击命中时由 TuiAltScreen 的 OSC 8 点击检测回调，跳转逻辑由 InteractiveMode 注入。
++let internalPiJumpHandler;
++
+ /** Composition root for selecting the interactive terminal renderer. */
+ export function createInteractiveTui(options) {
+     const terminal = options.terminal ?? new ProcessTerminal();
+@@ -174,7 +178,14 @@
+         return new TuiAltScreen(terminal, options.showHardwareCursor, options.logDirectory, {
+             searchMatchStyle: (text) => theme.underline(styleSearchMatch(text)),
+             searchCurrentMatchStyle: (text) => theme.bold(theme.inverse(styleSearchMatch(text))),
+-            openUrl: openBrowser,
++            // KAI-PATCH: 拦截 pi-jump:// 内部链接（上一条 prompt 提示栏点击），其余 URL 照常开浏览器
++            openUrl: (url) => {
++                if (typeof url === "string" && url.startsWith("pi-jump://") && internalPiJumpHandler) {
++                    internalPiJumpHandler(url);
++                    return;
++                }
++                openBrowser(url);
++            },
+             onRightClickPaste: options.onRightClickPaste,
+             copySelection: async (text) => {
+                 try {
+@@ -219,7 +230,30 @@
+         has: (_target, property) => Reflect.has(getTui(), property),
+         getPrototypeOf: () => Reflect.getPrototypeOf(getTui()),
+     });
++}
++// KAI-PATCH: Claude Code 式「上一条 prompt」提示栏。
++// 当用户向上滚动离开底部时，在 transcript 与编辑器之间显示一行：
++// ▲ <最后一条用户消息（可点击跳回）>   shift+up 跳回 · end 回底部
++// 点击消息文本（OSC 8 链接）或按 shift+up 立即跳回上一条 prompt。
++class PreviousPromptBar {
++    constructor(getState) {
++        this.getState = getState;
++    }
++    render(width) {
++        const state = this.getState();
++        if (!state || !state.visible || width < 24)
++            return [];
++        const label = theme.fg("accent", "▲");
++        const hint = theme.fg("dim", "点击跳回");
++        const maxText = Math.max(6, width - visibleWidth(label) - 1 - visibleWidth(hint) - 3);
++        // 整条都是 OSC 8 点击热区，点任意位置跳到上一条用户消息
++        const promptText = theme.underline(truncateToWidth(state.promptText ?? "", maxText));
++        const line = hyperlink(`${label} ${promptText} · ${hint}`, "pi-jump://prev-prompt");
++        return [truncateToWidth(line, width)];
++    }
++    invalidate() { }
+ }
++
+ export class InteractiveMode {
+     runtimeHost;
+     renderer;
+@@ -367,6 +401,9 @@
+         this.documentContainer.addChild(this.chatContainer);
+         this.pendingMessagesContainer = new Container();
+         this.statusContainer = new Container();
++        // KAI-PATCH: 「上一条 prompt」提示栏容器，位于 transcript 与编辑器之间
++        this.prevPromptBarContainer = new Container();
++        this.lastUserPromptText = "";
+         this.widgetContainerAbove = new Container();
+         this.widgetContainerBelow = new Container();
+         this.keybindings = KeybindingsManager.create();
+@@ -644,7 +681,17 @@
+             scrollbar: this.settingsManager.getFullscreenScrollbar(),
+             scrollbarStyle: (text) => theme.bg("scrollbarThumb", text),
+         });
++        // KAI-PATCH: Claude Code 式「上一条 prompt」提示栏。滚动离开底部时出现，
++        // 显示最后一条用户消息（可点击跳回），并给出跳转键提示。
++        this.prevPromptBar = new PreviousPromptBar(() => ({
++            visible: !!this.lastUserPromptText && !this.transcriptScrollView.isFollowingEnd,
++            promptText: this.lastUserPromptText,
++        }));
++        this.prevPromptBarContainer.addChild(this.prevPromptBar);
++        // KAI-PATCH: 内部链接点击 → 跳转逻辑
++        internalPiJumpHandler = (url) => this.handlePiJumpUrl(url);
+         const dock = new TuiLayouts.VStack([
++            { component: this.prevPromptBarContainer, shrink: 1, minSize: 0 },
+             { component: this.pendingMessagesContainer, shrink: 1, minSize: 0 },
+             { component: this.statusContainer, shrink: 1, minSize: 0 },
+             { component: this.widgetContainerAbove, shrink: 1, minSize: 0 },
+@@ -658,6 +705,7 @@
+         ]);
+         this.mountInteractiveTui(this.renderer, [
+             this.documentContainer,
++            this.prevPromptBarContainer,
+             this.pendingMessagesContainer,
+             this.statusContainer,
+             this.widgetContainerAbove,
+@@ -2799,6 +2847,15 @@
+             : message.content.filter((c) => c.type === "text");
+         return textBlocks.map((c) => c.text).join("");
+     }
++    // KAI-PATCH: 处理提示栏点击发出的 pi-jump:// 内部链接
++    handlePiJumpUrl(url) {
++        if (url === "pi-jump://prev-prompt") {
++            this.ui.scrollToLastPrompt?.();
++        }
++        else if (url === "pi-jump://bottom") {
++            this.ui.scrollToBottom?.();
++        }
++    }
+     /** Show a managed-tool status update in the chat. */
+     showManagedToolStatus(status) {
+         if (!this.managedToolStatusStarted) {
+@@ -2890,6 +2947,9 @@
+             }
+             case "user": {
+                 const textContent = this.getUserMessageText(message);
++                // KAI-PATCH: 记录最后一条用户消息原文，供「上一条 prompt」提示栏展示
++                if (textContent)
++                    this.lastUserPromptText = textContent;
+                 if (textContent) {
+                     if (this.chatContainer.children.length > 0) {
+                         this.chatContainer.addChild(new Spacer(1));

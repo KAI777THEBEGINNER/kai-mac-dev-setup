@@ -1,0 +1,21 @@
+--- package/dist/modes/interactive/components/user-message.js	1985-10-26 16:15:00
++++ /Users/zhaoziqi/.npm-global/lib/node_modules/@earendil-works/pi-coding-agent/dist/modes/interactive/components/user-message.js	2026-08-16 20:37:01
+@@ -4,6 +4,9 @@
+ const OSC133_ZONE_START = "\x1b]133;A\x07";
+ const OSC133_ZONE_END = "\x1b]133;B\x07";
+ const OSC133_ZONE_FINAL = "\x1b]133;C\x07";
++// KAI-PATCH: 用户消息专属零宽标记，供「跳到上一条 prompt」精确定位
++// （OSC 7777 序列对终端不可见，visibleWidth 按零宽处理）
++const KAI_USER_MARKER = "\x1b]7777;kai-user\x07";
+ /**
+  * Component that renders a user message
+  */
+@@ -41,7 +44,7 @@
+         if (lines.length === 0) {
+             return lines;
+         }
+-        lines[0] = OSC133_ZONE_START + lines[0];
++        lines[0] = OSC133_ZONE_START + KAI_USER_MARKER + lines[0];
+         lines[lines.length - 1] = OSC133_ZONE_END + OSC133_ZONE_FINAL + lines[lines.length - 1];
+         return lines;
+     }
