@@ -1,23 +1,14 @@
 # 第三方项目声明
 
-本仓库包含或引用了以下第三方开源项目 / 资源。各自保留原许可证。
+本仓库包含或引用了以下第三方开源项目 / 资源，各自保留原许可证。
 
-## 终端与 CLI
+## 终端与工具
 
 | 项目 | 仓库 | 许可证 | 用途 |
 |------|------|--------|------|
 | Ghostty | https://github.com/ghostty-org/ghostty | MPL-2.0 | 终端模拟器 |
-| Zellij | https://github.com/zellij-org/zellij | MIT | 终端复用器（ multiplexer ） |
-| Claude Code | https://github.com/anthropics/claude-code | 专有 / 服务条款 | Anthropic 官方 CLI 助手 |
-| CC Switch | https://github.com/farion1231/cc-switch | 见仓库 | Claude Code 多账号 / 多模型切换 GUI |
-
-## Claude Code 生态
-
-| 项目 | 仓库 | 许可证 | 用途 |
-|------|------|--------|------|
-| ClaudeStatusBar | https://github.com/hadesh/ClaudeStatusBar | MIT | macOS 菜单栏实时显示 Claude Code 会话状态 |
-| claude-statusline-hud | https://github.com/Thewhey-Brian/claude-statusline-hud | MIT | Claude Code 终端内状态栏 HUD |
-| cc-sound-effects | https://github.com/KAI777THEBEGINNER/cc-sound-effects | 见仓库 | 自定义 Claude Code 音效（本人仓库） |
+| Zellij | https://github.com/zellij-org/zellij | MIT | 终端复用器（multiplexer） |
+| pi coding agent | https://github.com/earendil-works/pi | MIT | 本仓库 `pi/` 配置服务的 AI 编码助手 |
 | ghostty-retro-stars | https://github.com/KAI777THEBEGINNER/ghostty-retro-stars | 见仓库 | Ghostty 复古星空终端环境（本人仓库） |
 
 ## Ghostty Shaders
@@ -26,35 +17,31 @@
 
 | 文件 | 原始作者/仓库 | 原始文件链接 |
 |------|--------------|-------------|
-| `ghostty/shaders/cursor_blaze.glsl` | dkarter/dotfiles | https://github.com/dkarter/dotfiles/blob/main/config/ghostty/shaders/cursor.glsl |
-| `ghostty/shaders/bettercrt.glsl` | Lementknight/dotfiles（基于 m-ahdal/ghostty-shaders 的 retro-terminal.glsl） | https://github.com/Lementknight/dotfiles/blob/main/ghostty/bettercrt.glsl |
-| `ghostty/shaders/starfield.glsl` | robb/dotfiles | https://github.com/robb/dotfiles/blob/main/ghostty/shaders/starfield.glsl |
+| `ghostty/custom_shader/cursor_blaze.glsl` | dkarter/dotfiles | https://github.com/dkarter/dotfiles/blob/main/config/ghostty/shaders/cursor.glsl |
+| `ghostty/custom_shader/bettercrt.glsl` | Lementknight/dotfiles（基于 m-ahdal/ghostty-shaders 的 retro-terminal.glsl） | https://github.com/Lementknight/dotfiles/blob/main/ghostty/bettercrt.glsl |
+| `ghostty/custom_shader/starfield.glsl` | robb/dotfiles | https://github.com/robb/dotfiles/blob/main/ghostty/shaders/starfield.glsl |
+| `ghostty/custom_shader/starfield_downloaded.glsl` | robb/dotfiles（同上，下载版） | 同上 |
 | `ghostty/shaders/shader.glsl` | dkarter/dotfiles | https://github.com/dkarter/dotfiles/blob/main/config/ghostty/shaders/cursor.glsl |
 
 原始 shader 的修改说明见各文件头部注释。
 
-## Claude Code Marketplace Skills
+## 随仓库分发的 Skill
 
-以下 Skill 通过 Claude Code 插件市场安装，未包含在本仓库源码中，使用时请从市场安装：
+`pi/skills/` 下的部分 skill 来自公开项目，各自保留原许可证与声明，详见对应目录：
 
-| Skill | 仓库/来源 |
-|-------|----------|
-| deep-research | Claude Code 官方 / 市场 |
-| docx-to-md | Claude Code 官方 / 市场 |
-| epub-to-obsidian | Claude Code 官方 / 市场 |
-| ielts 系列 | Claude Code 官方 / 市场 |
-| podcast-play / podcast-transcribe | Claude Code 官方 / 市场 |
-| ppt-screenshot-pptx | Claude Code 官方 / 市场 |
-| storage-analyzer | Claude Code 官方 / 市场 |
-| web-perf | Claude Code 官方 / 市场 |
-| agents-sdk / cloudflare 系列 / durable-objects / sandbox-sdk / turnstile-spin / workers-best-practices / wrangler | Cloudflare 官方 / 市场 |
+| Skill | 来源 | 许可证 |
+|-------|------|--------|
+| `lieflat-charts` | https://moxt.ai（随附 `LICENSE` 与 `THIRD_PARTY_NOTICES.md`） | 见目录内文件 |
+| `human-writing` | 随附 `LICENSE` | 见目录内文件 |
+| `swiftui-pro`、`deep-research`、`docx-to-md`、`epub-to-obsidian`、`ppt-screenshot-pptx`、`storage-analyzer`、`proxy-doctor`、`obsidian-vault` | 公开市场 / 官方示例，部分经本人改写 | 见各 `SKILL.md` |
 
 ## 字体
 
-配置中使用的字体需自行安装：
+配置中引用的字体需自行安装：
 
-- JetBrains Mono：https://www.jetbrains.com/lp/mono/
+- Ioskeley Mono Term（Berkeley Mono 开源复刻）：https://github.com/ioskeley/ioskeley-mono
 - PingFang SC：macOS 系统自带
+- JetBrains Mono：https://www.jetbrains.com/lp/mono/
 
 ## 说明
 

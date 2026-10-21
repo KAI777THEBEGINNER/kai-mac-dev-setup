@@ -2,7 +2,6 @@
 # 新机器装配置：仓库 → 本机。
 #
 #   bash install.sh                     只装终端组（Ghostty + zellij + zsh + pi）
-#   bash install.sh --with-claude-code  连 Claude Code 一起装（仅本机已有 ~/.claude 时生效）
 #   bash install.sh --dry-run           先看会改哪些文件
 #   bash install.sh --home /tmp/fake    装到别的 HOME（冒烟测试）
 #

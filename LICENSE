@@ -22,6 +22,5 @@ SOFTWARE.
 
 ---
 
-Note: Third-party files in this repository (e.g., Ghostty shaders, ClaudeStatusBar
-hook scripts, claude-statusline-hud plugin) retain their original licenses.
-See THIRD_PARTY.md for attribution and source links.
+Note: Third-party files in this repository (e.g., Ghostty shaders) retain their
+original licenses. See THIRD_PARTY.md for attribution and source links.

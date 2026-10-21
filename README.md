@@ -53,8 +53,7 @@ git add -A && git commit -m "Update terminal config"
 | `zellij/` | 0.42 配置：自定义键位、内联金色主题 `gold` | `~/.config/zellij/config.kdl` |
 | `shell/` | `.zshrc`（zellij 单会话自动启动、PATH、Ghidra）、`.zprofile`（brew 镜像） | `~/` |
 | `bin/` | `ghostty-bg`（背景开关）、`ghostty-reload`（改 shader 后热重载） | `~/.local/bin/` |
-| `pi/` | 行为规则 `AGENTS.md`、`settings.json`、`models.json`、快捷键、subagents、主题、6 个 agents、10+ skills、4 个扩展、脚本 | `~/.pi/agent/` |
-| `claude-code/` | 旧的 Claude Code 配置：默认不装，只有本机已存在 `~/.claude` 且加了 `--with-claude-code` 才处理 | `~/.claude/` |
+| `pi/` | 行为规则 `AGENTS.md`、`settings.json`、`models.json`、快捷键、subagents、主题、6 个 agents、skills、4 个扩展、脚本 | `~/.pi/agent/` |
 
 机器相关的绝对路径在仓库里写成 `{{HOME}}`，安装时替换成实际家目录，所以新电脑的用户名不同也不会坏。
 

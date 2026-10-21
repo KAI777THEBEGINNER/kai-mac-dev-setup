@@ -1,22 +1,18 @@
 # CODEBASE.md —— kai-mac-dev-setup 代码地图
 
-> 自动生成于 2026-10-21 18:03（pi codebase-map）。改动代码后运行 `/map` 刷新。
+> 自动生成于 2026-10-21 20:53（pi codebase-map）。改动代码后运行 `/map` 刷新。
 > 用法：先读本图建立全局认知，再按需 read 具体文件；不要每次全量扫仓库。
 
 ## 总览
 
 - 技术栈：.py/.sh/.ts
-- 源码文件：41 个
-- 入口：`claude-code/pet/clippy-pet.swift`
+- 源码文件：26 个
+- 入口：`pi/extensions/plan-mode/index.ts`
 
 ## 目录结构
 
 ```
 ├── ./  (2 files at root)
-├── claude-code/  (15 files)
-│   ├── backup/  (6 files)
-│   ├── pet/  (6 files)
-│   └── statusbar/  (3 files)
 ├── pi/  (23 files)
 │   ├── extensions/  (5 files)
 │   │   └── plan-mode/  (2 files)
@@ -40,11 +36,6 @@
 
 - `README.md`
 - `THIRD_PARTY.md`
-- `claude-code/CLAUDE.md`
-- `claude-code/pet/README.md`
-- `claude-code/pet/requirements.txt`
-- `claude-code/skills/dark_factory_mode.md`
-- `claude-code/skills/dragon_subduing_7_steps.md`
 - `pi/AGENTS.md`
 - `pi/USER-GUIDE.md`
 - `pi/agents/build-error-resolver.md`
@@ -68,33 +59,17 @@
 - `pi/skills/human-writing/references/fiction.md`
 - `pi/skills/human-writing/references/formats.md`
 - `pi/skills/human-writing/references/forum-prose.md`
+- `pi/skills/human-writing/references/reality.md`
+- `pi/skills/human-writing/references/revision.md`
+- `pi/skills/lieflat-charts/README.en.md`
+- `pi/skills/lieflat-charts/README.md`
+- `pi/skills/lieflat-charts/SKILL.md`
 
 ## 源码地图
 
 ### (root)/
 - `export.sh` —— 本机改完配置后回流仓库：本机 → 仓库。
 - `install.sh` —— 新机器装配置：仓库 → 本机。
-
-### claude-code/backup/
-- `sanitize-cc-switch-db.py` （符号：is_dead、is_sound_hook、merge_event、sanitize、main）
-- `sanitize-settings.py` —— 只保留失败音效；成功/请求确认音效按用户要求移除。 （符号：is_sound_hook、is_dead、merge_event、main）
-- `sanitize-settings-local.py` （符号：main）
-- `auto-sanitize.sh` —— Auto-sanitizer for Claude Code settings. Triggered by launchd whenever settings.json or settings.local.json changes. Strips dead app hooks a
-- `fix-hooks.sh` —— 检测并清除 settings.json 中指向不存在文件的 hook 用法: bash ~/.claude/backup/fix-hooks.sh
-- `restore-settings.sh` —— 恢复 Claude Code 非 env 配置（保留当前模型/API 设置），并自动清理已卸载 app 残留。 用法: bash ~/.claude/backup/restore-settings.sh
-
-### claude-code/pet/
-- `clippy-pet.swift` —— ── Configuration ── （符号：AnimConfig、ProcessMonitor、start、check、hasClaudeProcess、StateFileMonitor、StateMonitor、scanInitialState、PetView、play、AppDelegate、transition、applicationDidFinishLaunching）
-- `main.py` —— Claude Code desktop pet — Clippy floating assistant.""" （符号：PetWindow、main）
-- `sprite.py` —— Spritesheet parser for Clippy desktop pet.""" （符号：Frame、SpriteSheet）
-- `state.py` —— Claude Code session-state watcher.""" （符号：ClaudeStateWatcher）
-- `extract_frames.py` —— One-off extraction: cut the Clippy spritesheet into numbered PNG frames."""
-- `run.sh` —— Compile if missing or source changed
-
-### claude-code/statusbar/
-- `lifecycle.js` —— SessionStart/SessionEnd lifecycle: launch the menu bar app when Claude Code opens, and quit it when the LAST session ends. A small counter f （符号：fs、os、path、cp、BUNDLE_ID、EXEC、dir、countFile、event、read、write、running、desktopOpen）
-- `update.js` —— Invoked by Claude Code hooks. Reads the hook JSON payload on stdin, maps the event to a status, and atomically writes ~/.claude/statusbar/st （符号：fs、os、path、dir、statePath、event、TOOL_LABELS、raw）
-- `watcher.sh` —— Resident watcher (launchd KeepAlive). Makes the menu bar icon track the Claude DESKTOP app, not just sessions: shows it the moment Claude.ap
 
 ### pi/extensions/
 - `session-title.ts` —— Session Title — 语义总结任务内容作为会话标题 （符号：STATUS_KEY、TITLE_MAX、CONVERSATION_BUDGET、PER_MESSAGE_CAP、DEBOUNCE_MS、GEN_TIMEOUT_MS、extractText、extractToolNames、buildConversationText、fingerprint、cleanTitle、buildTitlePrompt）
@@ -144,4 +119,4 @@
 
 ## 其他文件
 
-`LICENSE`、`bin/ghostty-bg`、`bin/ghostty-reload`、`claude-code/settings.json`、`claude-code/settings.local.json`、`claude-code/statusline-preset`、`ghostty/background.conf`、`ghostty/config`、`ghostty/custom_shader/bettercrt.glsl`、`ghostty/custom_shader/cursor_blaze.glsl`、`ghostty/custom_shader/starfield.glsl`、`ghostty/custom_shader/starfield_downloaded.glsl`、`ghostty/shaders/shader.glsl`、`manifest.json`、`pi/extensions/pi-computer-use.json`、`pi/keybindings.json`、`pi/models-store.json`、`pi/models.json`、`pi/patches/v1-bar-jump-已禁用/interactive-mode.js.kpatch`、`pi/patches/v1-bar-jump-已禁用/tui-alt-screen.js.kpatch`、`pi/patches/v1-bar-jump-已禁用/user-message.js.kpatch`、`pi/patches/v2-jump-2026-08-23-assistant-message.js.kpatch`、`pi/patches/v2-jump-2026-08-23-keybindings.js.kpatch`、`pi/patches/v2-jump-2026-08-23-tui-alt-screen.js.kpatch`、`pi/patches/v2-jump-2026-08-23-user-message.js.kpatch`、`pi/pi-dsh-minimal.json`、`pi/settings.json`、`pi/skills/agent-webbridge/tools.json`、`pi/skills/human-writing/LICENSE`、`pi/skills/human-writing/VERSION`、`pi/skills/human-writing/agents/openai.yaml`、`pi/skills/lieflat-charts/LICENSE`、`pi/skills/lieflat-charts/agents/openai.yaml`、`pi/skills/lieflat-charts/examples/lenny-2026-survey.html`、`pi/skills/lieflat-charts/templates/basics-gallery.html`、`pi/skills/lieflat-charts/templates/big-circular.html`、`pi/skills/lieflat-charts/templates/big-force.html`、`pi/skills/lieflat-charts/templates/big-threads.html`、`pi/skills/lieflat-charts/templates/color/basics-palm.html`、`pi/skills/lieflat-charts/templates/color/basics-porcelain.html`（共 61 个，仅列前 40）
+`LICENSE`、`bin/ghostty-bg`、`bin/ghostty-reload`、`ghostty/background.conf`、`ghostty/config`、`ghostty/custom_shader/bettercrt.glsl`、`ghostty/custom_shader/cursor_blaze.glsl`、`ghostty/custom_shader/starfield.glsl`、`ghostty/custom_shader/starfield_downloaded.glsl`、`ghostty/shaders/shader.glsl`、`manifest.json`、`pi/extensions/pi-computer-use.json`、`pi/keybindings.json`、`pi/models.json`、`pi/patches/v1-bar-jump-已禁用/interactive-mode.js.kpatch`、`pi/patches/v1-bar-jump-已禁用/tui-alt-screen.js.kpatch`、`pi/patches/v1-bar-jump-已禁用/user-message.js.kpatch`、`pi/patches/v2-jump-2026-08-23-assistant-message.js.kpatch`、`pi/patches/v2-jump-2026-08-23-keybindings.js.kpatch`、`pi/patches/v2-jump-2026-08-23-tui-alt-screen.js.kpatch`、`pi/patches/v2-jump-2026-08-23-user-message.js.kpatch`、`pi/pi-dsh-minimal.json`、`pi/settings.json`、`pi/skills/agent-webbridge/tools.json`、`pi/skills/human-writing/LICENSE`、`pi/skills/human-writing/VERSION`、`pi/skills/human-writing/agents/openai.yaml`、`pi/skills/lieflat-charts/LICENSE`、`pi/skills/lieflat-charts/agents/openai.yaml`、`pi/skills/lieflat-charts/examples/lenny-2026-survey.html`、`pi/skills/lieflat-charts/templates/basics-gallery.html`、`pi/skills/lieflat-charts/templates/big-circular.html`、`pi/skills/lieflat-charts/templates/big-force.html`、`pi/skills/lieflat-charts/templates/big-threads.html`、`pi/skills/lieflat-charts/templates/color/basics-palm.html`、`pi/skills/lieflat-charts/templates/color/basics-porcelain.html`、`pi/skills/lieflat-charts/templates/color/basics-wire.html`、`pi/skills/lieflat-charts/templates/color/big-circular-palm.html`、`pi/skills/lieflat-charts/templates/color/big-circular-porcelain.html`、`pi/skills/lieflat-charts/templates/color/big-force-palm.html`（共 57 个，仅列前 40）

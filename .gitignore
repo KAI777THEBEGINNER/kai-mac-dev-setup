@@ -1,5 +1,4 @@
 # Build artifacts
-claude-code/pet/clippy-pet
 *.o
 *.a
 *.dylib
@@ -20,17 +19,6 @@ claude-code/pet/clippy-pet
 *.db
 *.sqlite
 *.sqlite3
-
-# Claude Code runtime files (not config)
-sessions/
-history.jsonl
-paste-cache/
-cache/
-
-# Pet assets (user must provide spritesheet due to copyright)
-claude-code/pet/assets/spritesheet.webp
-claude-code/pet/assets/frames/*.png
-!claude-code/pet/assets/frames/.gitkeep
 
 # Python
 __pycache__/

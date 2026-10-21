@@ -7,8 +7,7 @@
 
 选项：
     --home DIR        操作另一个 HOME（冒烟测试用），默认 $HOME
-    --groups a,b      只处理这些分组，默认 terminal；apply 时 claude-code 组仅在
-                      本机存在 ~/.claude 时生效
+    --groups a,b      只处理这些分组，默认 terminal
     --only id1,id2    只处理指定 entry（调试用）
     --dry-run         只打印计划，不动文件
     --no-packages     apply 时不检查/安装 pi 扩展包
@@ -368,21 +367,6 @@ def hook_pii_guard(home: Path, dry: bool) -> None:
     info(f"  ↓ 已把 pii-guard 扩展补进 settings.json（词表在 ~/.pi/agent/pii-guard/，需单独准备）")
 
 
-def hook_launchagent(home: Path, dry: bool) -> None:
-    plist = home / "Library" / "LaunchAgents" / "com.local.claude-config-sanitizer.plist"
-    if not plist.exists() or shutil.which("launchctl") is None:
-        return
-    if dry:
-        info("  · 将加载 Claude 配置消毒 LaunchAgent")
-        return
-    uid = os.getuid()
-    subprocess.run(
-        ["launchctl", "bootstrap", f"gui/{uid}", str(plist)],
-        capture_output=True, text=True,
-    )
-    info("  ↓ 已尝试加载 Claude 配置消毒 LaunchAgent（已加载会静默忽略）")
-
-
 PREREQS = [
     ("brew", "Homebrew", "https://brew.sh"),
     ("ghostty", "Ghostty", "brew install --cask ghostty"),
@@ -442,8 +426,6 @@ def main() -> int:
     parser.add_argument("--home", default=os.path.expanduser("~"))
     parser.add_argument("--groups", default=",".join(DEFAULT_GROUPS))
     parser.add_argument("--only", default="")
-    parser.add_argument("--with-claude-code", action="store_true",
-                        help="连 claude-code 组一起处理（默认只处理 terminal）")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--no-packages", action="store_true")
     parser.add_argument("--force", action="store_true")
@@ -453,8 +435,6 @@ def main() -> int:
     manifest = load_manifest()
     token = manifest.get("homeToken", "{{HOME}}")
     groups = [g.strip() for g in args.groups.split(",") if g.strip()]
-    if args.with_claude_code and "claude-code" not in groups:
-        groups.append("claude-code")
     only = {x.strip() for x in args.only.split(",") if x.strip()}
 
     BACKUP_ROOT = home / f".mac-dev-setup-backup-{time.strftime('%Y%m%d_%H%M%S')}"
@@ -474,20 +454,12 @@ def main() -> int:
     info(f"{'预览' if args.dry_run else '执行'}：{args.command}  (HOME={home})")
     info("")
 
-    skip_claude = "claude-code" in groups and not (home / ".claude").exists()
-    if skip_claude:
-        info(f"{C_DIM}跳过 claude-code 组：本机没有 ~/.claude（只在装了 Claude Code 的机器上安装）{C_END}")
-        entries = [e for e in entries if e.get("group") != "claude-code"]
-
     for entry in entries:
         if args.command == "status":
             info(status_entry(entry, home, token))
         elif args.command == "export":
             info(export_entry(entry, home, token, args.dry_run))
         else:
-            group_missing = entry.get("group") == "claude-code" and not (home / ".claude").exists()
-            if group_missing:
-                continue
             info(apply_entry(entry, home, token, args.dry_run))
 
     if args.command == "apply":
@@ -496,8 +468,6 @@ def main() -> int:
         hook_pii_guard(home, args.dry_run)
         if not args.no_packages:
             hook_pi_packages(home, args.dry_run)
-        if any(e.get("group") == "claude-code" for e in entries):
-            hook_launchagent(home, args.dry_run)
         report_prereqs(home)
         info("")
         info("提示：zellij 的配置要新开窗口才生效；Ghostty 配置可用 ghostty-reload 热重载。")
