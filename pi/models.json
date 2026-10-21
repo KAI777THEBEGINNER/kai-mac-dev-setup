@@ -3,33 +3,256 @@
     "zhipu": {
       "baseUrl": "https://open.bigmodel.cn/api/paas/v4",
       "api": "openai-completions",
-      "compat": { "supportsDeveloperRole": false },
+      "compat": {
+        "supportsDeveloperRole": false
+      },
       "models": [
-        { "id": "glm-5.3" }, { "id": "glm-5.3-flash" },
-        { "id": "glm-5.2" }, { "id": "glm-5.1" }, { "id": "glm-5" },
-        { "id": "glm-5-turbo" }, { "id": "glm-4.7" }, { "id": "glm-4.6" },
-        { "id": "glm-4.5" }, { "id": "glm-4.5-air" }
+        {
+          "id": "glm-5.3",
+          "contextWindow": 1000000,
+          "maxTokens": 131072,
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 1.142857,
+            "output": 4.0,
+            "cacheRead": 0.285714,
+            "cacheWrite": 0
+          },
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": "max"
+          },
+          "compat": {
+            "supportsReasoningEffort": true
+          }
+        },
+        {
+          "id": "glm-5.3-flash",
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1000000,
+          "maxTokens": 131072,
+          "reasoning": true,
+          "cost": {
+            "input": 0.114286,
+            "output": 0.4,
+            "cacheRead": 0.032857,
+            "cacheWrite": 0
+          },
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": null,
+            "high": "high",
+            "xhigh": null,
+            "max": "max"
+          },
+          "compat": {
+            "supportsReasoningEffort": true
+          }
+        },
+        {
+          "id": "glm-5.2",
+          "contextWindow": 1000000,
+          "maxTokens": 131072,
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 1.142857,
+            "output": 4.0,
+            "cacheRead": 0.285714,
+            "cacheWrite": 0
+          }
+        },
+        {
+          "id": "glm-5.1",
+          "contextWindow": 200000,
+          "maxTokens": 131072,
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0.857143,
+            "output": 3.428571,
+            "cacheRead": 0.185714,
+            "cacheWrite": 0,
+            "tiers": [
+              {
+                "inputTokensAbove": 32000,
+                "input": 1.142857,
+                "output": 4.0,
+                "cacheRead": 0.285714,
+                "cacheWrite": 0
+              }
+            ]
+          }
+        },
+        {
+          "id": "glm-5",
+          "contextWindow": 200000,
+          "maxTokens": 131072,
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0.571429,
+            "output": 2.571429,
+            "cacheRead": 0.142857,
+            "cacheWrite": 0,
+            "tiers": [
+              {
+                "inputTokensAbove": 32000,
+                "input": 0.857143,
+                "output": 3.142857,
+                "cacheRead": 0.214286,
+                "cacheWrite": 0
+              }
+            ]
+          }
+        },
+        {
+          "id": "glm-5-turbo",
+          "contextWindow": 200000,
+          "maxTokens": 131072,
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0.714286,
+            "output": 3.142857,
+            "cacheRead": 0.171429,
+            "cacheWrite": 0,
+            "tiers": [
+              {
+                "inputTokensAbove": 32000,
+                "input": 1.0,
+                "output": 3.714286,
+                "cacheRead": 0.257143,
+                "cacheWrite": 0
+              }
+            ]
+          }
+        },
+        {
+          "id": "glm-4.7",
+          "contextWindow": 200000,
+          "maxTokens": 131072,
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0.428571,
+            "output": 2.0,
+            "cacheRead": 0.085714,
+            "cacheWrite": 0,
+            "tiers": [
+              {
+                "inputTokensAbove": 32000,
+                "input": 0.571429,
+                "output": 2.285714,
+                "cacheRead": 0.114286,
+                "cacheWrite": 0
+              }
+            ]
+          }
+        },
+        {
+          "id": "glm-4.6",
+          "contextWindow": 200000,
+          "maxTokens": 131072,
+          "reasoning": true,
+          "input": [
+            "text"
+          ]
+        },
+        {
+          "id": "glm-4.5",
+          "contextWindow": 131072,
+          "maxTokens": 98304,
+          "reasoning": true,
+          "input": [
+            "text"
+          ]
+        },
+        {
+          "id": "glm-4.5-air",
+          "contextWindow": 131072,
+          "maxTokens": 98304,
+          "reasoning": true,
+          "input": [
+            "text"
+          ],
+          "cost": {
+            "input": 0.114286,
+            "output": 0.857143,
+            "cacheRead": 0.022857,
+            "cacheWrite": 0,
+            "tiers": [
+              {
+                "inputTokensAbove": 32000,
+                "input": 0.171429,
+                "output": 1.142857,
+                "cacheRead": 0.034286,
+                "cacheWrite": 0
+              }
+            ]
+          }
+        }
       ]
     },
     "openrouter": {
       "modelOverrides": {
         "deepseek/deepseek-v4-flash-0731": {
-          "cost": { "input": 0.045, "output": 0.09, "cacheRead": 0.009, "cacheWrite": 0 },
+          "cost": {
+            "input": 0.045,
+            "output": 0.09,
+            "cacheRead": 0.009,
+            "cacheWrite": 0
+          },
           "compat": {
             "supportsDeveloperRole": false,
             "thinkingFormat": "openrouter",
             "requiresReasoningContentOnAssistantMessages": true,
             "openRouterRouting": {
-              "order": ["baidu", "deepinfra", "digitalocean"],
+              "order": [
+                "baidu",
+                "deepinfra",
+                "digitalocean"
+              ],
               "allow_fallbacks": true
             }
           }
         },
         "deepseek/deepseek-v4-pro-0813": {
-          "cost": { "input": 0.66, "output": 1.98 }
+          "cost": {
+            "input": 0.66,
+            "output": 1.98
+          }
         },
         "moonshotai/kimi-k3": {
-          "cost": { "input": 3, "output": 15, "cacheRead": 0.3, "cacheWrite": 0 }
+          "cost": {
+            "input": 3,
+            "output": 15,
+            "cacheRead": 0.3,
+            "cacheWrite": 0
+          }
         }
       },
       "models": [
@@ -37,21 +260,119 @@
           "id": "z-ai/glm-5.3-flash",
           "name": "GLM 5.3 Flash",
           "reasoning": true,
-          "input": ["text", "image"],
+          "input": [
+            "text",
+            "image"
+          ],
           "contextWindow": 1310720,
           "maxTokens": 131072,
-          "cost": { "input": 0.075, "output": 0.25, "cacheRead": 0.015, "cacheWrite": 0 },
-          "compat": { "supportsDeveloperRole": false, "thinkingFormat": "openrouter" }
+          "cost": {
+            "input": 0.075,
+            "output": 0.25,
+            "cacheRead": 0.015,
+            "cacheWrite": 0
+          },
+          "compat": {
+            "supportsDeveloperRole": false,
+            "thinkingFormat": "openrouter"
+          }
         },
         {
           "id": "z-ai/glm-5.3",
           "name": "GLM 5.3",
           "reasoning": true,
-          "input": ["text"],
+          "input": [
+            "text"
+          ],
           "contextWindow": 1310720,
           "maxTokens": 131072,
-          "cost": { "input": 1.4, "output": 4.4, "cacheRead": 0.25, "cacheWrite": 0 },
-          "compat": { "supportsDeveloperRole": false, "thinkingFormat": "openrouter" }
+          "cost": {
+            "input": 1.4,
+            "output": 4.4,
+            "cacheRead": 0.25,
+            "cacheWrite": 0
+          },
+          "compat": {
+            "supportsDeveloperRole": false,
+            "thinkingFormat": "openrouter"
+          }
+        }
+      ]
+    },
+    "aigocode-openai": {
+      "name": "AIGoCode (Codex / OpenAI)",
+      "baseUrl": "https://api.aigocode.dev/v1",
+      "api": "openai-responses",
+      "models": [
+        {
+          "id": "gpt-6-astra",
+          "name": "GPT-6 Astra",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1000000,
+          "maxTokens": 128000,
+          "cost": {
+            "input": 1.714286,
+            "output": 8.571429,
+            "cacheRead": 0.171429,
+            "cacheWrite": 2.142857,
+            "tiers": [
+              {
+                "inputTokensAbove": 272000,
+                "input": 3.428571,
+                "output": 12.857143,
+                "cacheRead": 0.342857,
+                "cacheWrite": 4.285714
+              }
+            ]
+          },
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "max"
+          }
+        },
+        {
+          "id": "gpt-6.1-sol",
+          "name": "GPT-6.1 Sol",
+          "reasoning": true,
+          "input": [
+            "text",
+            "image"
+          ],
+          "contextWindow": 1050000,
+          "maxTokens": 128000,
+          "cost": {
+            "input": 0.342857,
+            "output": 1.714286,
+            "cacheRead": 0.017143,
+            "cacheWrite": 0.428571,
+            "tiers": [
+              {
+                "inputTokensAbove": 272000,
+                "input": 0.685714,
+                "output": 2.571429,
+                "cacheRead": 0.034286,
+                "cacheWrite": 0.857143
+              }
+            ]
+          },
+          "thinkingLevelMap": {
+            "off": null,
+            "minimal": null,
+            "low": "low",
+            "medium": "medium",
+            "high": "high",
+            "xhigh": "xhigh",
+            "max": "max"
+          }
         }
       ]
     }

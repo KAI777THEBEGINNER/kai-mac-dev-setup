@@ -1,0 +1,5 @@
+{
+  "default_model": "deepseek/deepseek-flash",
+  "default_effort": "max",
+  "session_resources": "full"
+}

@@ -1,124 +1,18 @@
 #!/bin/bash
-# Install Kai's macOS dev setup (Ghostty + Zellij + Claude Code + Pi agent).
-# Usage: bash install.sh
+# 新机器装配置：仓库 → 本机。
+#
+#   bash install.sh                     只装终端组（Ghostty + zellij + zsh + pi）
+#   bash install.sh --with-claude-code  连 Claude Code 一起装（仅本机已有 ~/.claude 时生效）
+#   bash install.sh --dry-run           先看会改哪些文件
+#   bash install.sh --home /tmp/fake    装到别的 HOME（冒烟测试）
+#
+# 覆盖前会把原文件备份到 ~/.mac-dev-setup-backup-<时间戳>/。
+set -euo pipefail
+cd "$(dirname "$0")"
 
-set -e
-
-REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
-BACKUP_DIR="$HOME/.kai-mac-dev-setup-backup-$(date +%Y%m%d_%H%M%S)"
-
-echo "Kai's macOS Dev Setup Installer"
-echo "================================"
-echo ""
-
-mkdir -p "$BACKUP_DIR"
-
-# --- Ghostty ---
-if [ -d "$HOME/.config/ghostty" ]; then
-    echo "Backing up existing Ghostty config..."
-    cp -R "$HOME/.config/ghostty" "$BACKUP_DIR/ghostty"
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "需要 python3（macOS 自带，或 xcode-select --install）" >&2
+    exit 1
 fi
 
-echo "Installing Ghostty config..."
-mkdir -p "$HOME/.config/ghostty"
-cp "$REPO_DIR/ghostty/config" "$HOME/.config/ghostty/config"
-mkdir -p "$HOME/.config/ghostty/custom_shader"
-cp "$REPO_DIR/ghostty/shaders/"*.glsl "$HOME/.config/ghostty/custom_shader/"
-mkdir -p "$HOME/.config/ghostty/shaders"
-cp "$REPO_DIR/ghostty/shaders/shader.glsl" "$HOME/.config/ghostty/shaders/shader.glsl"
-
-# --- Zellij ---
-if [ -f "$HOME/.config/zellij/config.kdl" ]; then
-    echo "Backing up existing Zellij config..."
-    cp "$HOME/.config/zellij/config.kdl" "$BACKUP_DIR/zellij-config.kdl"
-fi
-
-echo "Installing Zellij config..."
-mkdir -p "$HOME/.config/zellij"
-cp "$REPO_DIR/zellij/config.kdl" "$HOME/.config/zellij/config.kdl"
-
-# --- Claude Code ---
-mkdir -p "$HOME/.claude"
-
-if [ -f "$HOME/.claude/settings.json" ]; then
-    cp "$HOME/.claude/settings.json" "$BACKUP_DIR/settings.json"
-fi
-if [ -f "$HOME/.claude/settings.local.json" ]; then
-    cp "$HOME/.claude/settings.local.json" "$BACKUP_DIR/settings.local.json"
-fi
-if [ -f "$HOME/.claude/CLAUDE.md" ]; then
-    cp "$HOME/.claude/CLAUDE.md" "$BACKUP_DIR/CLAUDE.md"
-fi
-
-echo "Installing Claude Code config..."
-cp "$REPO_DIR/claude-code/settings.json" "$HOME/.claude/settings.json"
-cp "$REPO_DIR/claude-code/settings.local.json" "$HOME/.claude/settings.local.json"
-cp "$REPO_DIR/claude-code/CLAUDE.md" "$HOME/.claude/CLAUDE.md"
-cp "$REPO_DIR/claude-code/statusline-preset" "$HOME/.claude/statusline-preset"
-
-# Skills
-mkdir -p "$HOME/.claude/skills"
-cp "$REPO_DIR/claude-code/skills/"*.md "$HOME/.claude/skills/"
-
-# Statusbar hooks
-mkdir -p "$HOME/.claude/statusbar"
-cp "$REPO_DIR/claude-code/statusbar/"*.js "$HOME/.claude/statusbar/"
-cp "$REPO_DIR/claude-code/statusbar/"*.sh "$HOME/.claude/statusbar/"
-chmod +x "$HOME/.claude/statusbar/watcher.sh"
-
-# --- Pi coding agent ---
-PI_DIR="$HOME/.pi/agent"
-mkdir -p "$PI_DIR"
-
-for f in AGENTS.md USER-GUIDE.md pi-customizations.md pi-dsh-minimal.json settings.json keybindings.json models.json models-store.json; do
-    if [ -f "$PI_DIR/$f" ]; then
-        cp "$PI_DIR/$f" "$BACKUP_DIR/pi-$f"
-    fi
-    cp "$REPO_DIR/pi/$f" "$PI_DIR/$f"
-done
-
-for d in agents extensions patches scripts skills; do
-    if [ -d "$PI_DIR/$d" ]; then
-        cp -R "$PI_DIR/$d" "$BACKUP_DIR/pi-$d"
-    fi
-    cp -R "$REPO_DIR/pi/$d/." "$PI_DIR/$d/"
-done
-
-echo "Pi agent config installed."
-echo "⚠️  auth.json 不会从仓库安装。如为全新机器，运行 pi 后按提示重新登录。"
-
-# Backup / sanitize scripts
-mkdir -p "$HOME/.claude/backup"
-cp "$REPO_DIR/claude-code/backup/"*.py "$HOME/.claude/backup/"
-cp "$REPO_DIR/claude-code/backup/"*.sh "$HOME/.claude/backup/"
-chmod +x "$HOME/.claude/backup/"*.sh
-
-# Pet
-mkdir -p "$HOME/.claude/pet"
-cp "$REPO_DIR/claude-code/pet/"*.py "$HOME/.claude/pet/"
-cp "$REPO_DIR/claude-code/pet/"*.swift "$HOME/.claude/pet/"
-cp "$REPO_DIR/claude-code/pet/"*.sh "$HOME/.claude/pet/"
-cp "$REPO_DIR/claude-code/pet/"*.txt "$HOME/.claude/pet/"
-cp "$REPO_DIR/claude-code/pet/README.md" "$HOME/.claude/pet/README.md"
-mkdir -p "$HOME/.claude/pet/assets/frames"
-
-echo ""
-echo "Installing config sanitizer LaunchAgent..."
-mkdir -p "$HOME/Library/LaunchAgents"
-cp "$REPO_DIR/claude-code/backup/com.local.claude-config-sanitizer.plist" "$HOME/Library/LaunchAgents/" 2>/dev/null || true
-
-# Load agent if plist exists
-if [ -f "$HOME/Library/LaunchAgents/com.local.claude-config-sanitizer.plist" ]; then
-    launchctl bootstrap gui/$(id -u) "$HOME/Library/LaunchAgents/com.local.claude-config-sanitizer.plist" 2>/dev/null || true
-fi
-
-echo ""
-echo "安装完成。"
-echo "备份保存在: $BACKUP_DIR"
-echo ""
-echo "⚠️  重要：请编辑 ~/.claude/settings.json，把以下占位符替换为真实值："
-echo "    ANTHROPIC_AUTH_TOKEN"
-echo "    ANTHROPIC_BASE_URL（如使用官方端点可保持默认）"
-echo ""
-echo "宠物素材需要自行准备：将 spritesheet.webp 放到 ~/.claude/pet/assets/spritesheet.webp"
-echo "然后运行：bash ~/.claude/pet/run.sh"
+exec python3 tools/sync.py apply "$@"

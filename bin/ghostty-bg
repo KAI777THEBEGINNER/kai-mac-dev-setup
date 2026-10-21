@@ -1,0 +1,116 @@
+#!/bin/sh
+# ghostty-bg —— 一键开关 Ghostty「定制化背景」
+#   ghostty-bg          切换（on <-> off）
+#   ghostty-bg on       打开：半透明 + 毛玻璃 + 三个自定义 shader
+#   ghostty-bg off      关闭：纯黑不透明、无毛玻璃、无 shader
+#   ghostty-bg status   显示当前状态与生效值
+#
+# 原理：改 ~/.config/ghostty/background.conf（主 config 里用
+# `config-file = ?background.conf` 引它），然后给 Ghostty 发 SIGUSR2 热重载。
+# 全程不 kill、不重启任何进程，也不影响正在跑的会话。
+
+set -eu
+
+CONF_DIR="${HOME}/.config/ghostty"
+BG_CONF="${CONF_DIR}/background.conf"
+GHOSTTY_BIN="/Applications/Ghostty.app/Contents/MacOS/ghostty"
+
+usage() {
+    sed -n '2,9p' "$0" | sed 's/^# \{0,1\}//'
+}
+
+state() {
+    if [ -f "$BG_CONF" ] && grep -qE '^[[:space:]]*custom-shader[[:space:]]*=' "$BG_CONF"; then
+        printf 'on'
+    else
+        printf 'off'
+    fi
+}
+
+write_on() {
+    cat > "$BG_CONF" <<'EOF'
+# 由 `ghostty-bg` 管理，请勿手改（手改请用 ghostty-bg on / off）
+# 开 = 半透明 + 毛玻璃 + 三个自定义 shader
+background-opacity = 0.80
+background-blur = true
+custom-shader = ~/.config/ghostty/shaders/shader.glsl
+custom-shader = ~/.config/ghostty/custom_shader/bettercrt.glsl
+custom-shader = ~/.config/ghostty/custom_shader/starfield_downloaded.glsl
+EOF
+}
+
+write_off() {
+    cat > "$BG_CONF" <<'EOF'
+# 由 `ghostty-bg` 管理，请勿手改（手改请用 ghostty-bg on / off）
+# 关 = 纯黑不透明、无毛玻璃、无 shader
+background-opacity = 1.0
+background-blur = false
+EOF
+}
+
+print_effective() {
+    echo "--- 生效值（ghostty +show-config）---"
+    "$GHOSTTY_BIN" +show-config 2>/dev/null \
+        | grep -E '^(background-opacity|background-blur|custom-shader)' \
+        || echo "(没有背景定制项 ⇒ 已是纯默认背景)"
+}
+
+reload() {
+    pids=""
+    for p in $(pgrep -x ghostty 2>/dev/null || true); do
+        if kill -USR2 "$p" 2>/dev/null; then pids="${pids} ${p}"; fi
+    done
+    if [ -n "$pids" ]; then
+        echo "↻ 已热重载 Ghostty（SIGUSR2 → PID${pids}），没有重启任何进程"
+    else
+        echo "⚠ 没有运行中的 Ghostty 进程；新开的窗口会直接读新配置"
+    fi
+}
+
+target="${1:-toggle}"
+case "$target" in
+    on|off|toggle|status) ;;
+    -h|--help|help) usage; exit 0 ;;
+    *) echo "未知参数: $target" >&2; usage; exit 2 ;;
+esac
+
+[ -e "$GHOSTTY_BIN" ] || { echo "找不到 $GHOSTTY_BIN" >&2; exit 1; }
+
+cur="$(state)"
+
+if [ "$target" = "status" ]; then
+    echo "定制化背景: ${cur}"
+    print_effective
+    exit 0
+fi
+
+if [ "$target" = "toggle" ]; then
+    if [ "$cur" = "on" ]; then target="off"; else target="on"; fi
+fi
+
+if [ "$target" = "$cur" ]; then
+    echo "已经是 ${target}，无需改动"
+    exit 0
+fi
+
+tmp="$(mktemp)"
+if [ -f "$BG_CONF" ]; then cp "$BG_CONF" "$tmp"; fi
+
+if [ "$target" = "on" ]; then write_on; else write_off; fi
+
+# 写坏了就回滚，绝不把配置留在坏状态
+if ! "$GHOSTTY_BIN" +validate-config >/dev/null 2>&1; then
+    if [ -s "$tmp" ]; then cp "$tmp" "$BG_CONF"; else rm -f "$BG_CONF"; fi
+    rm -f "$tmp"
+    echo "✗ 新配置校验没通过，已回滚，背景保持原样" >&2
+    exit 1
+fi
+rm -f "$tmp"
+
+reload
+if [ "$target" = "on" ]; then
+    echo "✅ 定制化背景: 已打开（半透明 + 毛玻璃 + 三个 shader）"
+else
+    echo "✅ 定制化背景: 已关闭（纯黑不透明、无毛玻璃、无 shader）"
+fi
+print_effective

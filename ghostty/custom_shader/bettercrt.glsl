@@ -1,11 +1,11 @@
 // Enhanced CRT Shader for Ghostty
 // Modified for stronger cathode-ray tube texture and retro authenticity
 
-float warp = 0.22; // 屏幕弯曲程度
+float warp = 0.12375; // 屏幕弯曲程度 (原 0.165 的 75%)
 float scan = 0.35; // 扫描线对比度 (之前只有 0.05，太弱了)
-float aberration_strength = 0.00105; // RGB 色差分离强度 (模拟荧光粉溢出，当前值的70%)
+float aberration_strength = 0.000525; // RGB 色差分离强度 (模拟荧光粉溢出，原 0.00105 的 50%)
 float noise_intensity = 0.04; // 动态雪花噪点强度 (之前被设为 0 了)
-float feather_edge = 0.03; // 屏幕边缘的柔和度
+float feather_edge = 0.012; // 屏幕边缘的柔和度（原 0.03，太宽了，会把边缘的文字一起压暗）
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {
@@ -53,9 +53,10 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     float edge_mask = (1.0 - smoothstep(1.0 - feather_edge, 1.0, edge_dist.x)) *
                       (1.0 - smoothstep(1.0 - feather_edge, 1.0, edge_dist.y));
 
-    // 暗角特效 (Vignette) - 四周变暗
-    float vignette = 1.0 - (dc.x * dc.y * 12.0);
-    color *= clamp(vignette, 0.6, 1.0);
+    // 暗角特效 (Vignette) - 只压四角，不再压到正文区域
+    // 原式 1 - dc.x*dc.y*12 配合下限 0.6，会让四周约 8% 的范围整片暗 40%，盖住文字
+    float vignette = 1.0 - pow(clamp(dc.x * dc.y * 8.0, 0.0, 1.0), 1.6);
+    color *= clamp(vignette, 0.85, 1.0);
 
     // 亮度/对比度微调，补偿扫描线和暗角带来的亮度损失
     color = (color - 0.5) * 1.08 + 0.58; 

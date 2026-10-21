@@ -26,7 +26,7 @@ except ImportError:
     print("[错误] 缺少 html2text，请先执行: pip3 install html2text")
     sys.exit(1)
 
-DEFAULT_OUTPUT = "/Users/zhaoziqi/Library/Mobile Documents/iCloud~md~obsidian/Documents/kai_vault/Think Different/书籍"
+DEFAULT_OUTPUT = "{{HOME}}/Library/Mobile Documents/iCloud~md~obsidian/Documents/kai_vault/Think Different/书籍"
 
 
 def sanitize_filename(name):

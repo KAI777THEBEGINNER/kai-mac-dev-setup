@@ -31,3 +31,13 @@ cache/
 claude-code/pet/assets/spritesheet.webp
 claude-code/pet/assets/frames/*.png
 !claude-code/pet/assets/frames/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+
+# Nested repos vendored as skills
+pi/skills/*/.git/
+
+# Local sync artifacts
+*.sync-tmp

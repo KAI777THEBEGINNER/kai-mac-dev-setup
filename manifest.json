@@ -1,0 +1,269 @@
+{
+  "$comment": "唯一事实来源。每个 entry 说明仓库里的哪份配置对应本机哪个路径；export 从本机抄回仓库，apply 从仓库装到本机。改配置只改这个文件，别再手抄路径。",
+  "version": 1,
+  "homeToken": "{{HOME}}",
+  "groups": {
+    "terminal": "Ghostty + zellij + zsh + pi agent：默认安装",
+    "claude-code": "Claude Code：只有本机已装（存在 ~/.claude）时才安装"
+  },
+  "entries": [
+    {
+      "id": "ghostty-config",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "ghostty/config",
+      "target": "~/.config/ghostty/config"
+    },
+    {
+      "id": "ghostty-background",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "ghostty/background.conf",
+      "target": "~/.config/ghostty/background.conf"
+    },
+    {
+      "id": "ghostty-shaders",
+      "group": "terminal",
+      "kind": "tree",
+      "repo": "ghostty/shaders",
+      "target": "~/.config/ghostty/shaders",
+      "include": ["*.glsl"]
+    },
+    {
+      "id": "ghostty-custom-shaders",
+      "group": "terminal",
+      "kind": "tree",
+      "repo": "ghostty/custom_shader",
+      "target": "~/.config/ghostty/custom_shader",
+      "include": ["*.glsl"]
+    },
+    {
+      "id": "zellij-config",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "zellij/config.kdl",
+      "target": "~/.config/zellij/config.kdl"
+    },
+    {
+      "id": "zshrc",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "shell/zshrc",
+      "target": "~/.zshrc"
+    },
+    {
+      "id": "zprofile",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "shell/zprofile",
+      "target": "~/.zprofile"
+    },
+    {
+      "id": "bin-ghostty-bg",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "bin/ghostty-bg",
+      "target": "~/.local/bin/ghostty-bg"
+    },
+    {
+      "id": "bin-ghostty-reload",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "bin/ghostty-reload",
+      "target": "~/.local/bin/ghostty-reload"
+    },
+    {
+      "id": "pi-agents-md",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "pi/AGENTS.md",
+      "target": "~/.pi/agent/AGENTS.md"
+    },
+    {
+      "id": "pi-user-guide",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "pi/USER-GUIDE.md",
+      "target": "~/.pi/agent/USER-GUIDE.md"
+    },
+    {
+      "id": "pi-customizations",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "pi/pi-customizations.md",
+      "target": "~/.pi/agent/pi-customizations.md"
+    },
+    {
+      "id": "pi-dsh-minimal",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "pi/pi-dsh-minimal.json",
+      "target": "~/.pi/agent/pi-dsh-minimal.json"
+    },
+    {
+      "id": "pi-settings",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "pi/settings.json",
+      "target": "~/.pi/agent/settings.json"
+    },
+    {
+      "id": "pi-keybindings",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "pi/keybindings.json",
+      "target": "~/.pi/agent/keybindings.json"
+    },
+    {
+      "id": "pi-models",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "pi/models.json",
+      "target": "~/.pi/agent/models.json"
+    },
+    {
+      "id": "pi-subagents-json",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "pi/subagents.json",
+      "target": "~/.pi/agent/subagents.json"
+    },
+    {
+      "id": "pi-themes",
+      "group": "terminal",
+      "kind": "tree",
+      "repo": "pi/themes",
+      "target": "~/.pi/agent/themes",
+      "include": ["*.json"]
+    },
+    {
+      "id": "pi-agents",
+      "group": "terminal",
+      "kind": "tree",
+      "repo": "pi/agents",
+      "target": "~/.pi/agent/agents",
+      "include": ["*.md"]
+    },
+    {
+      "id": "pi-subagents",
+      "group": "terminal",
+      "kind": "tree",
+      "repo": "pi/subagents",
+      "target": "~/.pi/agent/subagents",
+      "include": ["*.md"]
+    },
+    {
+      "id": "pi-extensions",
+      "group": "terminal",
+      "kind": "tree",
+      "repo": "pi/extensions",
+      "target": "~/.pi/agent/extensions",
+      "include": ["*.ts", "*.js", "*.json", "*.md"],
+      "exclude": ["*.disabled"]
+    },
+    {
+      "id": "pi-scripts",
+      "group": "terminal",
+      "kind": "tree",
+      "repo": "pi/scripts",
+      "target": "~/.pi/agent/scripts",
+      "include": ["*.mjs", "*.js", "*.py"],
+      "chmodExec": ["*.py"]
+    },
+    {
+      "id": "pi-skills",
+      "group": "terminal",
+      "kind": "tree",
+      "repo": "pi/skills",
+      "target": "~/.pi/agent/skills",
+      "exclude": [".git", "node_modules", "__pycache__", "*.bak-*", ".DS_Store"],
+      "chmodExec": ["*.py", "*.sh"]
+    },
+    {
+      "id": "claude-settings",
+      "group": "claude-code",
+      "kind": "file",
+      "repo": "claude-code/settings.json",
+      "target": "~/.claude/settings.json"
+    },
+    {
+      "id": "claude-settings-local",
+      "group": "claude-code",
+      "kind": "file",
+      "repo": "claude-code/settings.local.json",
+      "target": "~/.claude/settings.local.json"
+    },
+    {
+      "id": "claude-md",
+      "group": "claude-code",
+      "kind": "file",
+      "repo": "claude-code/CLAUDE.md",
+      "target": "~/.claude/CLAUDE.md"
+    },
+    {
+      "id": "claude-statusline-preset",
+      "group": "claude-code",
+      "kind": "file",
+      "repo": "claude-code/statusline-preset",
+      "target": "~/.claude/statusline-preset"
+    },
+    {
+      "id": "claude-skills",
+      "group": "claude-code",
+      "kind": "tree",
+      "repo": "claude-code/skills",
+      "target": "~/.claude/skills",
+      "include": ["*.md"]
+    },
+    {
+      "id": "claude-statusbar",
+      "group": "claude-code",
+      "kind": "tree",
+      "repo": "claude-code/statusbar",
+      "target": "~/.claude/statusbar",
+      "include": ["*.js", "*.sh"],
+      "chmodExec": ["*.sh"]
+    },
+    {
+      "id": "claude-backup",
+      "group": "claude-code",
+      "kind": "tree",
+      "repo": "claude-code/backup",
+      "target": "~/.claude/backup",
+      "include": ["*.py", "*.sh", "*.plist"],
+      "chmodExec": ["*.sh"]
+    },
+    {
+      "id": "claude-pet",
+      "group": "claude-code",
+      "kind": "tree",
+      "repo": "claude-code/pet",
+      "target": "~/.claude/pet",
+      "include": ["*.py", "*.swift", "*.sh", "*.txt", "README.md"],
+      "exclude": ["assets"],
+      "chmodExec": ["*.sh"]
+    },
+    {
+      "id": "claude-sanitizer-launchagent",
+      "group": "claude-code",
+      "kind": "file",
+      "repo": "claude-code/backup/com.local.claude-config-sanitizer.plist",
+      "target": "~/Library/LaunchAgents/com.local.claude-config-sanitizer.plist"
+    }
+  ],
+  "excluded": [
+    { "path": "~/.pi/agent/auth.json", "reason": "登录凭证，新机器重新 pi 登录" },
+    { "path": "~/.pi/agent/memory/", "reason": "个人记忆（含真实姓名），不进公开仓库，需要时单独 rsync" },
+    { "path": "~/.pi/agent/sessions/", "reason": "会话记录，机器相关" },
+    { "path": "~/.pi/agent/pii-guard/", "reason": "脱敏词表与映射含真值，绝不入库" },
+    { "path": "~/.pi/agent/npm/", "reason": "pi 包缓存，install 时用 pi update --extensions 重建" },
+    { "path": "~/.pi/agent/bin/", "reason": "fd / rg 二进制，pi 自行准备" },
+    { "path": "~/.pi/agent/models-store.json", "reason": "模型目录缓存，可重新拉取" },
+    { "path": "~/.pi/agent/trust.json", "reason": "含本机绝对路径的信任记录" },
+    { "path": "~/.pi/agent/*.bak-*", "reason": "本地备份" },
+    { "path": "~/.pi/agent/skills-archive/", "reason": "已归档 skill" },
+    { "path": "~/.config/ghostty/auto/", "reason": "Ghostty 生成的临时主题" },
+    { "path": "~/.local/bin/{claude,deckclip,lidlockd,yt-dlp}", "reason": "符号链接与二进制，不属于配置" },
+    { "path": "~/Library/Fonts/IoskeleyMono/", "reason": "字体 26 MB 且非本人版权，新机器自行安装" }
+  ]
+}

@@ -1,0 +1,10 @@
+# ~/.zprofile
+# 由 ~/workspace/kai-mac-dev-setup 管理（manifest.json → shell/zprofile）
+
+# Homebrew（Apple Silicon）
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# 阿里云 Homebrew 镜像（ckbrew 写入）
+export HOMEBREW_PIP_INDEX_URL=http://mirrors.aliyun.com/pypi/simple
+export HOMEBREW_API_DOMAIN=https://mirrors.aliyun.com/homebrew/homebrew-bottles/api
+export HOMEBREW_BOTTLE_DOMAIN=https://mirrors.aliyun.com/homebrew/homebrew-bottles

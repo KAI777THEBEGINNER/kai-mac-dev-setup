@@ -8,6 +8,8 @@
 //   - 只在会话内容有新增（指纹变化）时才重新生成，一次用户输入最多生成一次
 //   - 用户手动 /name 过就不再自动覆盖，但标题照常显示在状态栏
 //   - 模型不可用、生成失败时静默跳过，不打扰主流程
+//   - 会话被替换（/new、/fork、/resume）或 /reload 后，旧实例的 ctx/pi 一律作废：
+//     定时器回调与生成结果全部作废且绝不抛错（否则 uncaughtException 会杀死整个 pi）
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { uuidv7 } from "@earendil-works/pi-ai";
 
@@ -126,6 +128,8 @@ export default function (pi: ExtensionAPI) {
   let lastFingerprint = "";
   let timer: ReturnType<typeof setTimeout> | undefined;
   let running = false;
+  // session_shutdown 之后旧实例持有的 ctx/pi 都可能已被 pi 标记为 stale，触碰即抛错
+  let shutdown = false;
 
   const setFooterTitle = (ctx: ExtensionContext, title: string) => {
     if (!ctx.hasUI) return;
@@ -138,7 +142,7 @@ export default function (pi: ExtensionAPI) {
   };
 
   const generate = async (ctx: ExtensionContext) => {
-    if (running) return;
+    if (running || shutdown) return;
     const model = ctx.model;
     if (!model || !ctx.modelRegistry.hasConfiguredAuth(model)) return;
 
@@ -173,7 +177,7 @@ export default function (pi: ExtensionAPI) {
         .trim();
 
       const title = cleanTitle(raw);
-      if (!title) return;
+      if (!title || shutdown) return;
 
       generatedTitle = title;
       pi.setSessionName(title);
@@ -187,6 +191,7 @@ export default function (pi: ExtensionAPI) {
 
   // 会话启动：还原已有会话名到状态栏，初始化指纹
   pi.on("session_start", async (_event, ctx) => {
+    shutdown = false;
     manualTitle = false;
     generatedTitle = pi.getSessionName();
     lastFingerprint = fingerprint(ctx.sessionManager.getBranch());
@@ -221,11 +226,15 @@ export default function (pi: ExtensionAPI) {
     if (timer) clearTimeout(timer);
     timer = setTimeout(() => {
       timer = undefined;
-      generate(ctx);
+      // 此处运行在 pi 事件系统 try/catch 的保护之外：ctx 若已因会话替换/重载失效，
+      // 任何异常都会变成 uncaughtException 直接杀死 pi，因此必须全部吞掉
+      if (shutdown) return;
+      void generate(ctx).catch(() => {});
     }, DEBOUNCE_MS);
   });
 
   pi.on("session_shutdown", async () => {
+    shutdown = true;
     if (timer) {
       clearTimeout(timer);
       timer = undefined;

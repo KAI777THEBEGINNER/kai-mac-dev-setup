@@ -1,16 +1,16 @@
 # agent-webbridge 运维与排障
 
-daemon 脚本：`/Users/zhaoziqi/agent-webbridge/agent-webbridge-daemon.py`
-状态目录：`/Users/zhaoziqi/.agent-webbridge`（日志 `logs/daemon.log`、pid `daemon.pid`、skill 副本 `skills/`）
+daemon 脚本：`{{HOME}}/agent-webbridge/agent-webbridge-daemon.py`
+状态目录：`{{HOME}}/.agent-webbridge`（日志 `logs/daemon.log`、pid `daemon.pid`、skill 副本 `skills/`）
 
 ## 生命周期
 
 ```bash
-python3 /Users/zhaoziqi/agent-webbridge/agent-webbridge-daemon.py start            # 后台启动（幂等，已在跑则直接返回）
-python3 /Users/zhaoziqi/agent-webbridge/agent-webbridge-daemon.py status           # 打印 /status JSON
-python3 /Users/zhaoziqi/agent-webbridge/agent-webbridge-daemon.py stop             # 停止
-python3 /Users/zhaoziqi/agent-webbridge/agent-webbridge-daemon.py restart          # 重启
-python3 /Users/zhaoziqi/agent-webbridge/agent-webbridge-daemon.py run --verbose    # 前台调试
+python3 {{HOME}}/agent-webbridge/agent-webbridge-daemon.py start            # 后台启动（幂等，已在跑则直接返回）
+python3 {{HOME}}/agent-webbridge/agent-webbridge-daemon.py status           # 打印 /status JSON
+python3 {{HOME}}/agent-webbridge/agent-webbridge-daemon.py stop             # 停止
+python3 {{HOME}}/agent-webbridge/agent-webbridge-daemon.py restart          # 重启
+python3 {{HOME}}/agent-webbridge/agent-webbridge-daemon.py run --verbose    # 前台调试
 ```
 
 端口默认 10086，可用 `--port` 或环境变量 `AGENT_WEBBRIDGE_PORT` 改。
@@ -36,11 +36,11 @@ curl -s http://127.0.0.1:10086/status     # 看 extension_connected / extension_
 ## skill 文件从哪来
 
 daemon 每次启动会把 skill（`SKILL.md` / `references/operations.md` / `tools.json`）
-写到本机权威副本 `/Users/zhaoziqi/.agent-webbridge/skills`，并同步到已存在的 agent skill 目录（`~/.claude/skills/`、`~/.codex/skills/`）。
+写到本机权威副本 `{{HOME}}/.agent-webbridge/skills`，并同步到已存在的 agent skill 目录（`~/.claude/skills/`、`~/.codex/skills/`）。
 内容只在有变化时才覆盖写。
 
-- 手动重写一次：`python3 /Users/zhaoziqi/agent-webbridge/agent-webbridge-daemon.py install-skill`
-- 启动时不写：`python3 /Users/zhaoziqi/agent-webbridge/agent-webbridge-daemon.py run --no-skill-install`
+- 手动重写一次：`python3 {{HOME}}/agent-webbridge/agent-webbridge-daemon.py install-skill`
+- 启动时不写：`python3 {{HOME}}/agent-webbridge/agent-webbridge-daemon.py run --no-skill-install`
 - 追加目标目录：`AGENT_WEBBRIDGE_SKILL_DIRS=/path/to/skills:/another/skills`
 
 ## 安全边界
@@ -48,6 +48,6 @@ daemon 每次启动会把 skill（`SKILL.md` / `references/operations.md` / `too
 - 只监听 `127.0.0.1`，非本机来源的 HTTP 请求直接 403。
 - `/ws` 校验 `Origin` 必须是 `chrome-extension://…`（浏览器 WebSocket 不受同源策略约束，
   不校验等于把浏览器控制权暴露给任意网页）。
-- 可选扩展白名单：`/Users/zhaoziqi/.agent-webbridge/allowed_extensions.txt`，每行一个扩展 ID。
+- 可选扩展白名单：`{{HOME}}/.agent-webbridge/allowed_extensions.txt`，每行一个扩展 ID。
 - 无任何外部上报；日志只记工具名与调试信息，不上传。
 - 任何能访问本机端口的进程都能驾驶这个浏览器，别把端口转发出去。

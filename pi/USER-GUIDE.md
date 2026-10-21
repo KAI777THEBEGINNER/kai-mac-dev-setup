@@ -40,7 +40,6 @@ pi -r                     # 选择要恢复的会话
 - **浏览器**：说「用 agent-webbridge」，自动接管 Dia 浏览器（保留登录态）。daemon 管理：`python3 ~/agent-webbridge/agent-webbridge-daemon.py status|start|stop`
 - **读图**：deepseek 不支持图像输入，pi 侧自动走 `~/.pi/agent/scripts/ocr_image.py`（本地 OCR），直接给图片路径即可
 - **记忆**：pi 无自动记忆。关键习惯已写死在 AGENTS.md（中文标点、PDF 多模态、禁止静默覆盖等）；项目细节存 `~/.pi/agent/memory/`，模型按需读取
-- **菜单栏 HUD**：自动工作，与 Claude Code 共用同一个 ClaudeStatusBar
 
 ## 5. 配置文件地图（`~/.pi/agent/`）
 

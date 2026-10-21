@@ -1,0 +1,42 @@
+# ~/.zshrc
+# 由 ~/workspace/kai-mac-dev-setup 管理（manifest.json → shell/zshrc）。
+# 想让 Codex Bar 之类探针跳过 zellij 自动启动：export CODEXBAR_PROBE=1
+
+# moa 证书环境：没装就不 source，避免新机器报错
+[ -f "$HOME/.moaextrc" ] && source "$HOME/.moaextrc"
+
+# ---- PATH ----
+export BUN_INSTALL="$HOME/.bun"
+export PATH="$HOME/.local/bin:$HOME/.npm-global/bin:$BUN_INSTALL/bin:$PATH"
+
+# bun completions
+[ -s "$BUN_INSTALL/_bun" ] && source "$BUN_INSTALL/_bun"
+
+export EDITOR="hx"
+export HOMEBREW_NO_AUTO_UPDATE=1
+# agent-webbridge skill 靠这个变量找 skill 目录
+export AGENT_WEBBRIDGE_SKILL_DIRS="$HOME/.pi/agent/skills"
+
+# Ghidra（逆向用）与它自带的 JDK：没装就跳过，不留无效 PATH
+if [ -d "/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home" ]; then
+    export JAVA_HOME="/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
+    export PATH="$JAVA_HOME/bin:$PATH"
+fi
+[ -d "$HOME/tools/ghidra_12.1.4_PUBLIC" ] && export GHIDRA_INSTALL_DIR="$HOME/tools/ghidra_12.1.4_PUBLIC"
+
+# ---- Zellij 自动启动 ----
+# 刻意的单会话设计（2026-10 定）：先清掉 EXITED 和没人连的会话，再开一个 gt-$$。
+# 原因：以前多开会一直留进程、特别耗电。不是 bug，别改成 attach 已有会话。
+if [[ $- == *i* ]] && [[ -t 0 ]] && [[ -z "$ZELLIJ" ]] && [[ -z "$CODEXBAR_PROBE" ]]; then
+    while IFS= read -r line; do
+        [[ -z "$line" ]] && continue
+        name="${line%% *}"
+        if [[ "$line" == *EXITED* ]]; then
+            zellij delete-session "$name" --force 2>/dev/null
+        elif [[ "$line" != *"(current)"* ]]; then
+            zellij kill-session "$name" 2>/dev/null
+            zellij delete-session "$name" --force 2>/dev/null
+        fi
+    done < <(zellij list-sessions -n 2>/dev/null)
+    zellij --session "gt-$$"
+fi

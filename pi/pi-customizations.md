@@ -1,7 +1,7 @@
 # pi 个性化改造记录
 
 > 本文件记录我对 pi（@earendil-works/pi-coding-agent，全局安装于
-> `/Users/zhaoziqi/.npm-global/lib/node_modules/@earendil-works/pi-coding-agent`）源码做的三处个性化改造。
+> `{{HOME}}/.npm-global/lib/node_modules/@earendil-works/pi-coding-agent`）源码做的三处个性化改造。
 > `pi update self` 或 npm 升级会**覆盖 dist 与 node_modules 里的改动**。
 > 恢复方式：升级后对我说「恢复我对派的个性化改造」，按本文件逐条重做即可。
 > 所有改造点都带 `KAI-PATCH` 注释标记，可用 `grep -rn "KAI-PATCH"` 检查丢失了哪些。
@@ -112,4 +112,4 @@ assistant 消息、latestInput 落点补偿、绘制与 scrollback 无标记残�
 
 ## 不受 pi 升级影响的部分
 
-`~/.pi/agent/extensions/` 下的扩展（session-title.ts、pi-statusbar.ts、plan-mode 等）是用户目录，pi 升级不动它们。
+`~/.pi/agent/extensions/` 下的扩展（session-title.ts、plan-mode、codebase-map.ts 等）是用户目录，pi 升级不动它们。

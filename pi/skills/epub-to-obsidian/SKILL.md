@@ -36,7 +36,7 @@ python3 -c "import ebooklib, bs4, html2text" 2>/dev/null || pip3 install ebookli
 
 - `$FILES` — 必填，一个或多个 `.epub` / `.txt` 文件路径（支持空格分隔的多个路径）
 - `$OUTPUT_DIR` — 可选，默认：
-  `/Users/zhaoziqi/Library/Mobile Documents/iCloud~md~obsidian/Documents/kai_vault/Think Different/书籍`
+  `{{HOME}}/Library/Mobile Documents/iCloud~md~obsidian/Documents/kai_vault/Think Different/书籍`
 
 ---
 

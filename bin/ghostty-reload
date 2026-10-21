@@ -1,0 +1,55 @@
+#!/bin/sh
+# ghostty-reload —— 热重载 Ghostty 配置与 shader，不重启任何进程
+#
+#   ghostty-reload          校验配置 + 热重载
+#   ghostty-reload -q       只重载，不做校验
+#   ghostty-reload -h       帮助
+#
+# 背景：改 shader 文件（custom_shader/*.glsl）不会自动生效。
+# macOS 的 kqueue 只会把「写内容」报到 Ghostty，`touch` 只改 mtime，
+# Ghostty 收不到事件 —— 所以必须显式发 SIGUSR2。
+
+set -eu
+
+GHOSTTY_BIN="/Applications/Ghostty.app/Contents/MacOS/ghostty"
+SHADER_DIR="${HOME}/.config/ghostty"
+
+usage() {
+    sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'
+}
+
+quiet=0
+case "${1:-}" in
+    ""|-q|--quiet) [ "${1:-}" = "-q" ] || [ "${1:-}" = "--quiet" ] && quiet=1 ;;
+    -h|--help|help) usage; exit 0 ;;
+    *) echo "未知参数: $1" >&2; usage; exit 2 ;;
+esac
+
+# 配置写坏了就别重载，免得把坏配置推进运行中的窗口
+if [ "$quiet" -eq 0 ] && [ -x "$GHOSTTY_BIN" ]; then
+    if ! "$GHOSTTY_BIN" +validate-config >/dev/null 2>&1; then
+        echo "✗ 配置校验没通过，已放弃重载（先修 config，不会动你的窗口）" >&2
+        "$GHOSTTY_BIN" +validate-config 2>&1 | grep -iE "error" | head -5 >&2 || true
+        exit 1
+    fi
+fi
+
+pids=""
+for p in $(pgrep -x ghostty 2>/dev/null || true); do
+    if kill -USR2 "$p" 2>/dev/null; then pids="${pids} ${p}"; fi
+done
+
+if [ -n "$pids" ]; then
+    echo "↻ 已热重载 Ghostty（PID${pids}）"
+    echo "  配置: ${SHADER_DIR}/config"
+    shader_list="$(/bin/ls -t "${SHADER_DIR}/custom_shader/"*.glsl 2>/dev/null | head -3 || true)"
+    if [ -n "$shader_list" ]; then
+        echo "  shader（按最近修改排序）:"
+        for f in $shader_list; do
+            [ -e "$f" ] || continue
+            printf '    %s  %s\n' "$(stat -f '%Sm' -t '%m-%d %H:%M' "$f")" "$(basename "$f")"
+        done
+    fi
+else
+    echo "⚠ 没有运行中的 Ghostty；新开的窗口会直接读新配置"
+fi

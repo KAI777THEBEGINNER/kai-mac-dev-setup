@@ -1,6 +1,12 @@
 # Ghostty 自定义 Shader 配置
-font-family = JetBrains Mono
+# 英文: Ioskeley Mono Term (Berkeley Mono 开源复刻, Term 版修复 Ghostty 箭头/制表符间距)
+font-family = Ioskeley Mono Term
+# 中文回退
 font-family = PingFang SC
+
+# 默认字号：系统默认 13 + 1（等价于每次启动自动按一次 Cmd+=）
+# 只设启动初始值，不锁死，Cmd+= / Cmd+- / Cmd+0 仍可随时调整
+font-size = 15
 
 # 禁用窗口状态恢复，防止 macOS 自动回到之前的 Claude Code session
 window-save-state = never
@@ -8,15 +14,17 @@ window-save-state = never
 # 启动 zsh，由 .zshrc 自动拉起 zellij
 command = zsh -il
 background = #000000
-# 调整背景透明度 (0.0 是完全透明，1.0 是完全不透明)
-# 推荐值：0.85 到 0.95 之间，你可以根据喜好微调
-background-opacity = 0.80
 
-# 开启毛玻璃模糊效果 (只在支持的系统上生效，如 macOS)
-background-blur = true
+# ---- 定制化背景（透明度 / 毛玻璃 / 三个自定义 shader）----
+# 已抽到下面这个文件，用 `ghostty-bg` 一键开关：
+#   ghostty-bg          切换
+#   ghostty-bg off      纯黑不透明、无毛玻璃、无 shader（截图/录屏/省电）
+#   ghostty-bg on       恢复定制背景
+#   ghostty-bg status   看当前状态
+# 脚本：~/.local/bin/ghostty-bg   自动热重载，不会重启 Ghostty
+config-file = ?background.conf
 
 # 按序链式生效: cursor_blaze -> bettercrt -> starfield_downloaded
 
-custom-shader = ~/.config/ghostty/shaders/shader.glsl
-custom-shader = ~/.config/ghostty/custom_shader/bettercrt.glsl
-custom-shader = ~/.config/ghostty/custom_shader/starfield_downloaded.glsl
+# 只在终端内容变化时渲染，不在后台空转 60fps
+custom-shader-animation = true

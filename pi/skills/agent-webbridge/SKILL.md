@@ -33,7 +33,7 @@ curl -s -X POST http://127.0.0.1:10086/command -H 'Content-Type: application/jso
 body 写到唯一命名的临时文件（不要用 `echo`/heredoc，同样会破坏 JSON 与中文），再
 `curl -s -X POST http://127.0.0.1:10086/command -H 'Content-Type: application/json' --data-binary @<file>`，请求返回后立刻删掉该文件。
 
-机器可读的工具清单（JSON Schema）：`/Users/zhaoziqi/.pi/agent/skills/agent-webbridge/tools.json`。
+机器可读的工具清单（JSON Schema）：`{{HOME}}/.pi/agent/skills/agent-webbridge/tools.json`。
 
 ## 工具（共 17 个）
 
@@ -91,9 +91,9 @@ body 写到唯一命名的临时文件（不要用 `echo`/heredoc，同样会破
 连接被拒（daemon 没起）时**自己拉起来，不要问用户**，这个命令幂等，已在跑就直接返回：
 
 ```bash
-python3 /Users/zhaoziqi/agent-webbridge/agent-webbridge-daemon.py start
+python3 {{HOME}}/agent-webbridge/agent-webbridge-daemon.py start
 ```
 
 然后重试。若仍失败，或浏览器扩展一直连不上（`http://127.0.0.1:10086/status` 里 `extension_connected` 为 false），
-按 `/Users/zhaoziqi/.pi/agent/skills/agent-webbridge/references/operations.md` 排查：常见原因是扩展没装/被停用，或另一个同类扩展抢占了连接。
+按 `{{HOME}}/.pi/agent/skills/agent-webbridge/references/operations.md` 排查：常见原因是扩展没装/被停用，或另一个同类扩展抢占了连接。
 不要自动执行 `stop` / `restart`，那会打断正在跑的任务。
