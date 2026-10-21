@@ -1,19 +1,20 @@
 // Session Title — 语义总结任务内容作为会话标题
 //
 // 每次 agent 完全落定（agent_settled）后，用当前模型把会话核心任务
-// 总结成一句短标题，显示在 pi TUI 底部状态栏（footer 第三行），
-// 同时写入会话名（pi.setSessionName），重启/恢复会话后自动还原显示。
+// 总结成一句短标题，写入会话名（pi.setSessionName），重启/恢复会话后自动还原。
+//
+// 2026-10-22：不再往 TUI footer 推状态行（省一行显示空间），只写会话名；
+// 总结与命名逻辑保持原样，标题照常生成。
 //
 // 规则：
 //   - 只在会话内容有新增（指纹变化）时才重新生成，一次用户输入最多生成一次
-//   - 用户手动 /name 过就不再自动覆盖，但标题照常显示在状态栏
+//   - 用户手动 /name 过就不再自动覆盖
 //   - 模型不可用、生成失败时静默跳过，不打扰主流程
 //   - 会话被替换（/new、/fork、/resume）或 /reload 后，旧实例的 ctx/pi 一律作废：
 //     定时器回调与生成结果全部作废且绝不抛错（否则 uncaughtException 会杀死整个 pi）
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { uuidv7 } from "@earendil-works/pi-ai";
 
-const STATUS_KEY = "session-title";
 const TITLE_MAX = 40;
 const CONVERSATION_BUDGET = 6000;
 const PER_MESSAGE_CAP = 400;
@@ -131,16 +132,6 @@ export default function (pi: ExtensionAPI) {
   // session_shutdown 之后旧实例持有的 ctx/pi 都可能已被 pi 标记为 stale，触碰即抛错
   let shutdown = false;
 
-  const setFooterTitle = (ctx: ExtensionContext, title: string) => {
-    if (!ctx.hasUI) return;
-    ctx.ui.setStatus(STATUS_KEY, ctx.ui.theme.fg("dim", "● ") + ctx.ui.theme.fg("accent", title));
-  };
-
-  const clearFooterTitle = (ctx: ExtensionContext) => {
-    if (!ctx.hasUI) return;
-    ctx.ui.setStatus(STATUS_KEY, undefined);
-  };
-
   const generate = async (ctx: ExtensionContext) => {
     if (running || shutdown) return;
     const model = ctx.model;
@@ -181,7 +172,6 @@ export default function (pi: ExtensionAPI) {
 
       generatedTitle = title;
       pi.setSessionName(title);
-      setFooterTitle(ctx, title);
     } catch {
       // 生成失败静默跳过，下一次内容变化时再试
     } finally {
@@ -189,23 +179,20 @@ export default function (pi: ExtensionAPI) {
     }
   };
 
-  // 会话启动：还原已有会话名到状态栏，初始化指纹
+  // 会话启动：记住已有会话名（用于判断是否被手动改过），初始化指纹
   pi.on("session_start", async (_event, ctx) => {
     shutdown = false;
     manualTitle = false;
     generatedTitle = pi.getSessionName();
     lastFingerprint = fingerprint(ctx.sessionManager.getBranch());
-    if (generatedTitle) setFooterTitle(ctx, generatedTitle);
   });
 
-  // 会话名变化（/name 或本扩展写入）：同步状态栏；手动改名后不再自动覆盖
-  pi.on("session_info_changed", async (event, ctx) => {
+  // 会话名变化（/name 或本扩展写入）：手动改名后不再自动覆盖
+  pi.on("session_info_changed", async (event) => {
     if (event.name) {
       if (event.name !== generatedTitle) manualTitle = true;
-      setFooterTitle(ctx, event.name);
     } else {
       manualTitle = false;
-      clearFooterTitle(ctx);
     }
   });
 
