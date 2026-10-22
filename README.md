@@ -28,7 +28,7 @@ bash install.sh
 
 1. **开一个新的 Ghostty 窗口**（zellij 配置只对新会话生效，窗口里会自动进 `gt-<pid>` 会话）
 2. **运行 `pi`，按提示登录**（`auth.json` 不进仓库，四家 provider 的 key 都要重新填）
-3. 可选：装字体 `Ioskeley Mono`，否则 Ghostty 回退到系统等宽字体，其余效果不变
+3. 字体不用装：默认用 Ghostty 自带的 JetBrains Mono；想换 Ioskeley Mono 见文末
 
 `install.sh` 覆盖前会把你原来的文件备份到 `~/.mac-dev-setup-backup-<时间戳>/`，想回滚直接拷回去。
 
@@ -78,7 +78,7 @@ git add -A && git commit -m "Update terminal config"
 | `~/.pi/agent/pii-guard/` | 脱敏词表与映射含真值，绝不入库 |
 | `~/.pi/agent/npm/` | pi 扩展包缓存，`install.sh` 会按 `settings.json` 的 `packages` 重装 |
 | `~/.local/bin/` 里的二进制与符号链接 | 不是配置 |
-| `~/Library/Fonts/IoskeleyMono/` | 26 MB 字体，非本人版权 |
+| `~/Library/Fonts/IoskeleyMono/` | 26 MB 字体，非本人版权；配置已改用 Ghostty 自带的 JetBrains Mono，不再依赖它 |
 
 完整清单见 `manifest.json` 的 `excluded` 字段。
 

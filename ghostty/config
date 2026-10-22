@@ -1,6 +1,7 @@
 # Ghostty 自定义 Shader 配置
-# 英文: Ioskeley Mono Term (Berkeley Mono 开源复刻, Term 版修复 Ghostty 箭头/制表符间距)
-font-family = Ioskeley Mono Term
+# 英文：JetBrains Mono（Ghostty 自带，不用另装字体，任意机器一致）
+# 想换回 Ioskeley Mono（Berkeley Mono 开源复刻）就把它装进 ~/Library/Fonts 后改这一行
+font-family = JetBrains Mono
 # 中文回退
 font-family = PingFang SC
 
