@@ -39,7 +39,8 @@
 
 配置中引用的字体需自行安装：
 
-- Ioskeley Mono Term（Berkeley Mono 开源复刻）：https://github.com/ioskeley/ioskeley-mono
+- Ioskeley Mono（基于 Iosevka 的 OFL 字体，风格受 Berkeley Mono 影响）：https://github.com/ahatem/IoskeleyMono
+  在线样张（可直接打字对比）：https://ahatem.github.io/IoskeleyMono/
 - PingFang SC：macOS 系统自带
 - JetBrains Mono：https://www.jetbrains.com/lp/mono/
 
