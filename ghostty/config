@@ -1,7 +1,9 @@
 # Ghostty 自定义 Shader 配置
-# 英文：JetBrains Mono（Ghostty 自带，不用另装字体，任意机器一致）
-# 想换回 Ioskeley Mono（基于 Iosevka 的开源字体）就装进 ~/Library/Fonts 后改这一行
-font-family = JetBrains Mono
+# 英文：Ioskeley Mono Term（SemiCondensed 宽度）
+# 同一家族里宽度是 style 而不是 family，Ghostty 选不了宽度：只装 SemiCondensed，
+# Normal 宽度备份在 ~/.local/share/fonts-backup/IoskeleyMono-Normal/
+# 没装字体时 Ghostty 会回退到自带的 JetBrains Mono，效果也不差
+font-family = Ioskeley Mono Term
 # 中文回退
 font-family = PingFang SC
 

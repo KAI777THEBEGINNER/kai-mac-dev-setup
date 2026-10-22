@@ -28,7 +28,15 @@ bash install.sh
 
 1. **开一个新的 Ghostty 窗口**（zellij 配置只对新会话生效，窗口里会自动进 `gt-<pid>` 会话）
 2. **运行 `pi`，按提示登录**（`auth.json` 不进仓库，四家 provider 的 key 都要重新填）
-3. 字体不用装：默认用 Ghostty 自带的 JetBrains Mono；想换 Ioskeley Mono 见文末
+3. 可选：装 Ioskeley Mono（SemiCondensed 宽度）——不装则回退 Ghostty 自带的 JetBrains Mono，不影响使用
+
+```bash
+curl -L -o /tmp/ios.zip https://github.com/ahatem/IoskeleyMono/releases/latest/download/IoskeleyMono-Term.zip
+unzip -j /tmp/ios.zip "SemiCondensed/Hinted/*" -d ~/Library/Fonts/IoskeleyMono
+```
+
+**不要**把 Normal 宽度也装进同一个目录：CoreText 会把两种宽度并成同一个 family，
+Ghostty 只按 family 选字体，会永远用回 Normal。
 
 `install.sh` 覆盖前会把你原来的文件备份到 `~/.mac-dev-setup-backup-<时间戳>/`，想回滚直接拷回去。
 
@@ -78,7 +86,7 @@ git add -A && git commit -m "Update terminal config"
 | `~/.pi/agent/pii-guard/` | 脱敏词表与映射含真值，绝不入库 |
 | `~/.pi/agent/npm/` | pi 扩展包缓存，`install.sh` 会按 `settings.json` 的 `packages` 重装 |
 | `~/.local/bin/` 里的二进制与符号链接 | 不是配置 |
-| `~/Library/Fonts/IoskeleyMono/` | 26 MB 字体，非本人版权；配置已改用 Ghostty 自带的 JetBrains Mono，不再依赖它 |
+| `~/Library/Fonts/IoskeleyMono/` | 字体文件（OFL 1.1，可以自行下载），不进仓库；只装 SemiCondensed 宽度 |
 
 完整清单见 `manifest.json` 的 `excluded` 字段。
 
