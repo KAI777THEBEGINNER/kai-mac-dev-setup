@@ -1,0 +1,10 @@
+{
+  "name": "pi-pii-guard-byted-refined",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "pi agent 出站脱敏扩展（byted_refined）：正则 + 词表 + 未知人名启发式",
+  "scripts": {
+    "test": "node --test tests/engine.test.ts tests/payload.test.ts tests/name-heuristic.test.ts"
+  }
+}

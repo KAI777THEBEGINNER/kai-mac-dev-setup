@@ -53,7 +53,18 @@ git add -A && git commit -m "Update terminal config"
 | `zellij/` | 0.42 配置：自定义键位、内联金色主题 `gold` | `~/.config/zellij/config.kdl` |
 | `shell/` | `.zshrc`（zellij 单会话自动启动、PATH、Ghidra）、`.zprofile`（brew 镜像） | `~/` |
 | `bin/` | `ghostty-bg`（背景开关）、`ghostty-reload`（改 shader 后热重载） | `~/.local/bin/` |
-| `pi/` | 行为规则 `AGENTS.md`、`settings.json`、`models.json`、快捷键、subagents、主题、6 个 agents、skills、4 个扩展、脚本 | `~/.pi/agent/` |
+| `pi/` | 行为规则 `AGENTS.md`、`settings.json`、`models.json`、快捷键、subagents、主题、6 个 agents、skills、扩展、脚本 | `~/.pi/agent/` |
+| `pi/extensions/pii-guard/` | **byted_refined** 脱敏层：正则 + 词表 + 未知人名启发式 | `~/.pi/agent/extensions/pii-guard/` |
+
+### 脱敏层（byted_refined）
+
+`pi/extensions/pii-guard/` 是独立的出站脱敏组件，随仓库分发：
+
+- **正则**：手机号、邮箱、身份证、护照、银行卡（Luhn 校验）、各类 API key / 私钥 / JWT、微信号
+- **词表**：本人及往来人名的中/英/拼音写法，机构、学校、学号等自定义实体
+- **未知人名启发式**（byted_refined 新增）：在「X老师 / 叫X / 姓名：X」这类高置信上下文里认出词表外的新人名，一次认出后整个会话的裸提及也会被挡
+
+词表、会话映射、leaks 日志都在 `~/.pi/agent/pii-guard/`（700/600 权限），**不进仓库**；仓库只放 `wordlist.example.json` 示例和词表初始化脚本。换机器要单独拷词表。
 
 机器相关的绝对路径在仓库里写成 `{{HOME}}`，安装时替换成实际家目录，所以新电脑的用户名不同也不会坏。
 

@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "_readme": "复制到 ~/.pi/agent/pii-guard/wordlist.json 后改成本机真值。people 里每个值会被替换成 <<LABEL:N>>；extraPatterns 可加自定义正则；allow 是豁免清单；nameHeuristics=false 可关掉未知人名启发式。",
+  "nameHeuristics": true,
+  "people": [
+    {
+      "label": "PERSON",
+      "canonical": "张三",
+      "aliases": ["小张", "zhangsan", "Zhang San"]
+    },
+    {
+      "label": "PERSON",
+      "canonical": "李四",
+      "aliases": ["lisi"]
+    },
+    {
+      "label": "ORG",
+      "canonical": "示例大学",
+      "aliases": ["示例大"]
+    }
+  ],
+  "extraPatterns": [
+    { "label": "STUDENT_ID", "regex": "\\b2021\\d{7}\\b", "description": "学号" }
+  ],
+  "allow": []
+}

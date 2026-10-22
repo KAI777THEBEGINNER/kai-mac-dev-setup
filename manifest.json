@@ -174,7 +174,24 @@
         "*.md"
       ],
       "exclude": [
-        "*.disabled"
+        "*.disabled",
+        "pii-guard"
+      ]
+    },
+    {
+      "id": "pi-pii-guard-byted-refined",
+      "group": "terminal",
+      "kind": "tree",
+      "repo": "pi/extensions/pii-guard",
+      "target": "~/.pi/agent/extensions/pii-guard",
+      "include": [
+        "*.ts",
+        "*.mjs",
+        "*.json",
+        "*.md"
+      ],
+      "exclude": [
+        "node_modules"
       ]
     },
     {
@@ -263,6 +280,14 @@
     {
       "path": "~/Library/Fonts/IoskeleyMono/",
       "reason": "字体 26 MB 且非本人版权，新机器自行安装"
+    },
+    {
+      "path": "~/.pi/agent/pii-guard/wordlist.json",
+      "reason": "含真实姓名/机构的词表，绝不入库；仓库只放 wordlist.example.json"
+    },
+    {
+      "path": "~/.pi/agent/pii-guard/state/",
+      "reason": "会话级 token→真值映射"
     }
   ]
 }

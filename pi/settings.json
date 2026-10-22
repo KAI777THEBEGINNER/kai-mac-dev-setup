@@ -18,7 +18,7 @@
   "lastChangelogVersion": "1.3.0",
   "tuiMode": "fullscreen",
   "extensions": [
-    "{{HOME}}/workspace/pi-pii-guard/src/index.ts"
+    "{{HOME}}/.pi/agent/extensions/pii-guard/index.ts"
   ],
   "doubleEscapeAction": "tree"
 }

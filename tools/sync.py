@@ -150,9 +150,12 @@ def walk_selected(root: Path, entry: dict) -> list[Path]:
     exclude = entry.get("exclude") or []
     skip_dirs = {".git", "node_modules", "__pycache__", ".DS_Store", "assets"} & set(exclude)
 
+    def dir_excluded(name: str) -> bool:
+        return name in skip_dirs or any(fnmatch.fnmatch(name, pat) for pat in exclude)
+
     picked: list[Path] = []
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = sorted(d for d in dirnames if d not in skip_dirs)
+        dirnames[:] = sorted(d for d in dirnames if not dir_excluded(d))
         for name in sorted(filenames):
             if name == ".DS_Store":
                 continue
@@ -337,34 +340,32 @@ def hook_pi_packages(home: Path, dry: bool) -> None:
 
 
 def hook_pii_guard(home: Path, dry: bool) -> None:
+    """让 settings.json 的 extensions 指向仓库里安装的 pii-guard。"""
     settings_path = home / ".pi" / "agent" / "settings.json"
-    project = home / "workspace" / "pi-pii-guard" / "src" / "index.ts"
+    extension = home / ".pi" / "agent" / "extensions" / "pii-guard" / "index.ts"
     if not settings_path.exists():
         return
     settings = json.loads(settings_path.read_text(encoding="utf-8"))
     ext = settings.setdefault("extensions", [])
-    if not project.exists():
-        if str(project) in ext:
-            ext.remove(str(project))
-            if not dry:
-                settings_path.write_text(
-                    json.dumps(settings, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-                )
-            info("  · 本机没有 pi-pii-guard 项目，已从 extensions 摘掉（可选组件）")
-        else:
-            info("  · 本机没有 pi-pii-guard 项目，pii-guard 不启用（可选）")
-        return
-    if str(project) in ext:
+    others = [e for e in ext if "pii-guard" not in str(e)]
+    want = str(extension) if extension.exists() else None
+    desired = others + ([want] if want else [])
+    if desired != ext:
+        if not dry:
+            settings["extensions"] = desired
+            settings_path.write_text(
+                json.dumps(settings, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+            )
+        info(f"  ↓ settings.json extensions 已指向 {pretty(extension, home)}" if want
+             else "  · 本机没装 pii-guard 扩展，已从 extensions 摘掉")
+    elif want:
         info("  = pii-guard 扩展已登记")
-        return
-    if dry:
-        info("  · 将把 pii-guard 扩展补进 settings.json")
-        return
-    ext.append(str(project))
-    settings_path.write_text(
-        json.dumps(settings, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
-    info(f"  ↓ 已把 pii-guard 扩展补进 settings.json（词表在 ~/.pi/agent/pii-guard/，需单独准备）")
+    wordlist = home / ".pi" / "agent" / "pii-guard" / "wordlist.json"
+    if want and not wordlist.exists():
+        warn(
+            "pii-guard 词表还没初始化：cd ~/.pi/agent/extensions/pii-guard && "
+            "node tools/init.mjs 然后填真值（示例见 wordlist.example.json）"
+        )
 
 
 PREREQS = [
