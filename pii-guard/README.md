@@ -15,8 +15,22 @@ message_end ←还原─ 助手回复（给你看）
 before_provider_request ─兜底脱敏 + 泄漏断言→ 云端
 ```
 
-> 这份代码是本仓库的独立组件，标记为 **byted_refined**：在原始脱敏层之上补了
-> 「未知人名启发式」，并随本仓库一起分发。调试与二次开发请直接改这里。
+> 这份代码是本仓库的一部分，标记为 **byted_refined**：在原始脱敏层之上补了
+> 「未知人名启发式」。整个项目都在 `pii-guard/` 下，调试与二次开发直接改这里。
+
+## 目录结构
+
+| 路径 | 说明 |
+|---|---|
+| `index.ts` / `src/` | pi 扩展本体（目录型扩展入口 + 引擎、规则、词表读写、启发式） |
+| `tools/` | `init.mjs` 生成词表、`scan-names.mjs` 扫候选、`audit.mjs` / `session-report.mjs` 审计 |
+| `tests/` | 43 个单测 |
+| `proxy/` | Codex CLI 用的本地 Responses API 脱敏代理（可选，不进 pi） |
+| `launchd/` | 代理的 LaunchAgent 模板 |
+| `DESIGN.md` / `REVIEW.md` / `HANDOFF-codex-proxy.md` | 设计、审核结论与代理交接记录 |
+
+`install.sh` 只把运行时文件（`index.ts`、`src/`、`tools/`、`tests/`、`package.json`、`README.md`、`wordlist.example.json`）
+装到 `~/.pi/agent/extensions/pii-guard`；`proxy/`、`launchd/` 和设计文档留在仓库里，不随安装复制。
 
 ## 挡什么
 

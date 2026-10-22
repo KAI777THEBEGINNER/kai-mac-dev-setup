@@ -456,6 +456,9 @@ def main() -> int:
     info("")
 
     for entry in entries:
+        if args.command == "export" and entry.get("noExport"):
+            info(f"  · {entry['id']}：仓库是源，跳过导出")
+            continue
         if args.command == "status":
             info(status_entry(entry, home, token))
         elif args.command == "export":

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.zhangsan6.codex-pii-proxy</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/usr/local/bin/node</string>
+    <string>/Users/zhangsan3/workspace/pi-pii-guard/proxy/server.ts</string>
+  </array>
+  <key>WorkingDirectory</key>
+  <string>/Users/zhangsan3/workspace/pi-pii-guard</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PII_PROXY_HOST</key>
+    <string>127.0.0.1</string>
+    <key>PII_PROXY_PORT</key>
+    <string>8787</string>
+    <key>PII_PROXY_UPSTREAM</key>
+    <string>https://api.aigocode.dev/v1</string>
+    <key>PII_CODEX_SESSION_ID</key>
+    <string>codex-proxy</string>
+  </dict>
+  <key>RunAtLoad</key>
+  <true/>
+  <key>KeepAlive</key>
+  <true/>
+  <key>ProcessType</key>
+  <string>Interactive</string>
+  <key>LowPriorityIO</key>
+  <true/>
+  <key>StandardOutPath</key>
+  <string>/Users/zhangsan3/.pi/agent/pii-guard/codex-proxy.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/zhangsan3/.pi/agent/pii-guard/codex-proxy.error.log</string>
+</dict>
+</plist>

@@ -54,11 +54,11 @@ git add -A && git commit -m "Update terminal config"
 | `shell/` | `.zshrc`（zellij 单会话自动启动、PATH、Ghidra）、`.zprofile`（brew 镜像） | `~/` |
 | `bin/` | `ghostty-bg`（背景开关）、`ghostty-reload`（改 shader 后热重载） | `~/.local/bin/` |
 | `pi/` | 行为规则 `AGENTS.md`、`settings.json`、`models.json`、快捷键、subagents、主题、6 个 agents、skills、扩展、脚本 | `~/.pi/agent/` |
-| `pi/extensions/pii-guard/` | **byted_refined** 脱敏层：正则 + 词表 + 未知人名启发式 | `~/.pi/agent/extensions/pii-guard/` |
+| `pii-guard/` | **byted_refined** 脱敏层：正则 + 词表 + 未知人名启发式 | `~/.pi/agent/extensions/pii-guard/` |
 
 ### 脱敏层（byted_refined）
 
-`pi/extensions/pii-guard/` 是独立的出站脱敏组件，随仓库分发：
+`pii-guard/` 是独立的出站脱敏组件，随仓库分发：
 
 - **正则**：手机号、邮箱、身份证、护照、银行卡（Luhn 校验）、各类 API key / 私钥 / JWT、微信号
 - **词表**：本人及往来人名的中/英/拼音写法，机构、学校、学号等自定义实体

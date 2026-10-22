@@ -182,17 +182,29 @@
       "id": "pi-pii-guard-byted-refined",
       "group": "terminal",
       "kind": "tree",
-      "repo": "pi/extensions/pii-guard",
+      "repo": "pii-guard",
       "target": "~/.pi/agent/extensions/pii-guard",
       "include": [
+        "index.ts",
+        "package.json",
+        "README.md",
+        "wordlist.example.json",
         "*.ts",
         "*.mjs",
         "*.json",
         "*.md"
       ],
       "exclude": [
+        "proxy",
+        "launchd",
+        "AGENTS.md",
+        "DESIGN.md",
+        "HANDOFF-codex-proxy.md",
+        "REVIEW.md",
+        "codex-proxy.ts",
         "node_modules"
-      ]
+      ],
+      "noExport": true
     },
     {
       "id": "pi-scripts",
