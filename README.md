@@ -28,15 +28,33 @@ bash install.sh
 
 1. **开一个新的 Ghostty 窗口**（zellij 配置只对新会话生效，窗口里会自动进 `gt-<pid>` 会话）
 2. **运行 `pi`，按提示登录**（`auth.json` 不进仓库，四家 provider 的 key 都要重新填）
-3. 可选：装 Ioskeley Mono（SemiCondensed 宽度）——不装则回退 Ghostty 自带的 JetBrains Mono，不影响使用
+3. 可选：装终端字体（不装也能用，Ghostty 回退到自带 JetBrains Mono + PingFang SC）
 
 ```bash
+# 英文：Ioskeley Mono Term，只要 SemiCondensed 宽度
 curl -L -o /tmp/ios.zip https://github.com/ahatem/IoskeleyMono/releases/latest/download/IoskeleyMono-Term.zip
 unzip -j /tmp/ios.zip "SemiCondensed/Hinted/*" -d ~/Library/Fonts/IoskeleyMono
+
+# 中文：更纱黑体 Sarasa Term SC（需要 7z：brew install p7zip）
+curl -L -o /tmp/sarasa.7z https://github.com/be5invis/Sarasa-Gothic/releases/download/v1.0.42/SarasaTermSC-TTF-1.0.42.7z
+7z x -y -o/tmp/sarasa /tmp/sarasa.7z
+mkdir -p ~/Library/Fonts/SarasaTermSC && cp /tmp/sarasa/*.ttf ~/Library/Fonts/SarasaTermSC/
 ```
 
-**不要**把 Normal 宽度也装进同一个目录：CoreText 会把两种宽度并成同一个 family，
-Ghostty 只按 family 选字体，会永远用回 Normal。
+装了新字体 Ghostty 却没认出来：`atsutil databases -removeUser`，再重开 Ghostty。
+
+**Ioskeley 不要装 Normal 宽度**：CoreText 会把两种宽度并成同一个 family，Ghostty 只按 family 匹配，会永远用 Normal。
+
+中文字体备选（换掉 `font-family = Sarasa Term SC` 那一行即可）：
+
+| 字体 | 风格 | 安装 |
+|---|---|---|
+| Sarasa Term SC（现用） | 思源黑体 + Iosevka，终端专用，和 Ioskeley 气质最接近 | 上面那段 |
+| Sarasa Fixed SC | 同上，标点/全角更规整 | `brew install --cask font-sarasa-gothic`（843 MB，全系列） |
+| Maple Mono CN | 圆润、连字多，中文是思源黑体子集 | `brew install --cask font-maple-mono-cn` |
+| LXGW WenKai | 楷体，阅读舒服，笔画细 | `brew install --cask font-lxgw-wenkai` |
+| Noto Sans Mono CJK SC | 中性无个性，最稳 | `brew install --cask font-noto-sans-mono-cjk-sc` |
+| PingFang SC | macOS 自带，字面偏满 | 不用装 |
 
 `install.sh` 覆盖前会把你原来的文件备份到 `~/.mac-dev-setup-backup-<时间戳>/`，想回滚直接拷回去。
 
