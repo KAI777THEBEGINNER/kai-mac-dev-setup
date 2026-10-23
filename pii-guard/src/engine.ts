@@ -155,7 +155,7 @@ export class Masker {
   }
 
   /** 词表 + 正则 + 未知人名启发式的全部命中，未去重 */
-  scan(text: string): FoundMatch[] {
+  scan(text: string, opts: { learn?: boolean } = {}): FoundMatch[] {
     const out: FoundMatch[] = [];
 
     // 词表：首字符索引，逐位置尝试
@@ -177,7 +177,9 @@ export class Masker {
         out.push({ start: hit.start, end: hit.end, label: "PERSON" });
         // 单字（「王老师」里的「王」、单个首字母）只挡这一次，不登记，
         // 否则之后每个「王」「W」都会被替换掉
-        if (hit.value.length >= 2) this.learnName(hit.value);
+        // 只有用户自己写的文本才学习：助手回复、工具结果、文档里的示例
+        // （比如 pii-guard 自己的 README 就有「X老师」）不能教它认人，否则普通词会被永久替换。
+        if (hit.value.length >= 2 && opts.learn !== false) this.learnName(hit.value);
       }
     }
 
@@ -229,9 +231,9 @@ export class Masker {
     return token;
   }
 
-  mask(text: string, state: MaskState): string {
+  mask(text: string, state: MaskState, opts: { learn?: boolean } = {}): string {
     if (!text) return text;
-    const matches = Masker.resolve(this.scan(text));
+    const matches = Masker.resolve(this.scan(text, opts));
     if (matches.length === 0) return text;
     let out = "";
     let cursor = 0;

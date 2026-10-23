@@ -97,3 +97,24 @@ test("未知人名：nameHeuristics=false 时完全不猜人名", () => {
   const s = "王小梅老师说明天交材料";
   assert.equal(m.mask(s, emptyState()), s);
 });
+
+test("未知人名：普通词不会被学成人名（2026-10-23 误伤）", () => {
+  const cases = [
+    "而老师说的",
+    "之前开老师会",
+    "before 老师说的",
+    "是不是老师",
+    "就是老师说的",
+  ];
+  for (const t of cases) {
+    const m = new Masker(wordlist);
+    assert.equal(m.mask(t, emptyState()), t, t);
+  }
+});
+
+test("未知人名：真名在各种写法下仍能认出来", () => {
+  for (const t of ["王四老师说的", "Alice老师说的", "zhangsan老师说的"]) {
+    const m = new Masker(wordlist);
+    assert.ok(m.mask(t, emptyState()).includes(PERSON_1), t);
+  }
+});

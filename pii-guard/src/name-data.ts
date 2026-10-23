@@ -59,11 +59,24 @@ export const TEACHER_NOISE = new Set(
     .filter(Boolean),
 );
 
-/** 拉丁写法里不是人名的常见词（避免「English老师」被当成名字） */
+export const COMMON_WORDS_2 = new Set(
+  (
+    '之前 之后 然后 时候 现在 一个 这个 那个 什么 怎么 我们 他们 你们 自己 知道 觉得 没有 已经 还有 以及 或者 而且 不过 其实 当然 一定 大家 一起 一样 这样 那样 怎样 为什么 因为 所以 如果 虽然 但是 于是 就是 还是 只是 而是 也是 都是 却是 正是 总是 像是 算是 作为 成为 认为 以为 所谓 所有 有些 有点 比较 非常 特别 马上 立刻 刚刚 经常 偶尔 一般 通常 主要 重要 直接 具体 一下 一些 一点 很多 更多 最好 最后 第一 第二 首先 其次 另外 此外 同时 仍然 依然 确实 显然 自然 必然 居然 竟然 反而 总之 毕竟 到底 究竟 难道 何必 何况 即便 即使 除非 只要 只有 无论 不管 尽管 可以 可能 应该 需要 不会 不能 不要 上次 下次 今天 明天 昨天 今年 去年 明年 上午 下午 晚上 中午'
+  )
+    .split(/\s+/)
+    .filter(Boolean),
+);
+
+/** 双字候选的末字若是这些语法字，几乎不可能是名字（而是/就是/还是/但是/已经/…） */
+export const GRAMMAR_TAIL = new Set(
+  '的了是在和与也就都还很我你他她它们这那哪什么怎为因所但而如果然可以能会要有没不别太最更还再又已经正想看去来着过做吗呢吧啊呀个些及者且己道得实样'.split(""),
+);
+
+/** 拉丁写法里不是人名的常见词（避免「English同学」被当成名字） */
 export const LATIN_NOISE = new Set(
-  ("english chinese math maths physics chemistry biology history geography politics pe art music science computer coding writing reading speaking listening grammar teacher all every each any our your their this that these those new old young senior junior head class school college university prof professor mr ms mrs dr the and for".split(
-    /\s+/,
-  )),
+  (
+    'english chinese math maths physics chemistry biology history geography politics pe art music science computer coding writing reading speaking listening grammar teacher all every each any our your their this that these those new old young senior junior head class school college university prof professor mr ms mrs dr the and or but if else for with without about into onto over under between among during through across along around behind below beside beyond near off on out up down in at by from to of as than per via etc before after now since when while because although though however therefore also just only even still already always never often sometimes usually today yesterday tomorrow first second next last there here where why how what which who whom whose some both few many much more most other another such same own very too yes no am is are was were be been being have has had do does did will would can could should may might must shall'
+  ).split(/\s+/),
 );
 
 /** 这些字出现在候选前面时，视为「另一个词的边界」，允许非姓氏开头的两字候选 */

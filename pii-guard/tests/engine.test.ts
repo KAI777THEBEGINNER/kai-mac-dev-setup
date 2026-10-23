@@ -147,3 +147,18 @@ test("重叠消解：身份证不被拆成两段", () => {
   const masked = m.mask("11010119900307721X", s);
   assert.equal(masked, "<<ID_CARD:1>>");
 });
+
+test("学习范围：learn=false 时不登记，后续裸提及不再命中", () => {
+  const m = new Masker({ version: 1, people: [] });
+  const st = emptyState();
+  const first = m.mask("王四老师说的", st, { learn: false });
+  assert.ok(first.includes(tokenOf("PERSON", 1)), first);
+  assert.equal(m.mask("王四来了", st), "王四来了");
+});
+
+test("学习范围：默认会登记，后续裸提及也被挡", () => {
+  const m = new Masker({ version: 1, people: [] });
+  const st = emptyState();
+  m.mask("王四老师说的", st);
+  assert.ok(m.mask("王四来了", st).includes(tokenOf("PERSON", 1)));
+});

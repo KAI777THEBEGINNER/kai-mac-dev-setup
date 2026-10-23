@@ -246,13 +246,13 @@ export interface CompactionLikeEvent {
 export function maskCompactionInput(event: CompactionLikeEvent, mask: StrFn): void {
   const prep = event.preparation;
   if (Array.isArray(prep.messagesToSummarize)) {
-    prep.messagesToSummarize = prep.messagesToSummarize.map((m) => mapMessage(m, mask, true));
+    prep.messagesToSummarize = prep.messagesToSummarize.map((m) => mapMessage(m, (s) => mask(s, false), true));
   }
   if (Array.isArray(prep.turnPrefixMessages)) {
-    prep.turnPrefixMessages = prep.turnPrefixMessages.map((m) => mapMessage(m, mask, true));
+    prep.turnPrefixMessages = prep.turnPrefixMessages.map((m) => mapMessage(m, (s) => mask(s, false), true));
   }
   if (typeof prep.previousSummary === "string") {
-    prep.previousSummary = mask(prep.previousSummary);
+    prep.previousSummary = mask(prep.previousSummary, false);
   }
 }
 
@@ -294,11 +294,12 @@ export default function (pi: ExtensionAPI) {
   let skippedOnce = false;
 
 
-  const mask = (s: string): string => {
+  /** learn=false 时不把人名记进本会话记忆（用于工具结果/助手文本/压缩输入） */
+  const mask = (s: string, learn = true): string => {
     try {
       if (!s) return s;
       if (s.length > MAX_TEXT || isBinaryLike(s)) return s;
-      return masker.mask(s, state);
+      return masker.mask(s, state, { learn });
     } catch {
       return s;
     }
@@ -452,7 +453,7 @@ export default function (pi: ExtensionAPI) {
             "warning",
           );
         }
-        return mask(s);
+        return mask(s, false);
       }, false);
       scheduleSave();
       return { content: content as typeof event.content };
@@ -464,7 +465,10 @@ export default function (pi: ExtensionAPI) {
   // ---- 每轮请求前：对全部消息做兜底脱敏 ----
   pi.on("context", async (event) => {
     try {
-      const messages = event.messages.map((m) => mapMessage(m, mask, true));
+      // 只有用户消息参与「学人名」：助手回复/工具结果里的示例词（README、测试、文档）不能教它认人
+      const messages = event.messages.map((m) =>
+        mapMessage(m, (s) => mask(s, (m as { role?: string }).role === "user"), true),
+      );
       scheduleSave();
       return { messages: messages as typeof event.messages };
     } catch {

@@ -11,9 +11,13 @@
  * 且引导词后必须紧跟标点/常见谓语，避免「叫张三明天来」把「张三天」吃进来。
  */
 
+import { readFileSync } from "node:fs";
+
 import {
+  COMMON_WORDS_2,
   COMPOUND_SURNAMES,
   FUNCTION_CHARS,
+  GRAMMAR_TAIL,
   LATIN_NOISE,
   NAME_INTROS,
   NAME_NOISE,
@@ -28,9 +32,38 @@ export interface NameHit {
   value: string;
 }
 
+/** 普通词/语法词：以姓氏开头也可能不是人名（而是、之前、之前同学聚会…） */
+function isCommonWord(value: string): boolean {
+  if (NAME_NOISE.has(value) || COMMON_WORDS_2.has(value)) return true;
+  // 双字候选末字是语法字（而是/就是/还是/已经…）基本不是名字
+  return value.length === 2 && GRAMMAR_TAIL.has(value[value.length - 1]);
+}
+
+/**
+ * 小写拉丁候选：只有「不像英文单词」时才算人名。
+ * 否则「之前同学聚会」「now 同学」这类普通句子会被学成名字，之后全文被替换。
+ * 词典用系统自带 /usr/share/dict/words；没有就退回 LATIN_NOISE 兜底。
+ */
+let englishDict: Set<string> | null | undefined;
+function loadEnglishDict(): Set<string> | null {
+  if (englishDict !== undefined) return englishDict;
+  try {
+    const raw = readFileSync("/usr/share/dict/words", "utf8");
+    englishDict = new Set(raw.split("\n").map((w) => w.trim().toLowerCase()).filter(Boolean));
+  } catch {
+    englishDict = null;
+  }
+  return englishDict;
+}
+
+function isEnglishWord(word: string): boolean {
+  const dict = loadEnglishDict();
+  return dict ? dict.has(word.toLowerCase()) : false;
+}
+
 function isPlausibleName(value: string): boolean {
   if (value.length < 2 || value.length > 4) return false;
-  if (NAME_NOISE.has(value)) return false;
+  if (isCommonWord(value)) return false;
   const compound = COMPOUND_SURNAMES.has(value.slice(0, 2));
   if (compound) return value.length >= 3;
   if (!SURNAMES.has(value[0])) return false;
@@ -71,11 +104,14 @@ function findTeacherNames(text: string, allow?: Set<string>): NameHit[] {
     if (latin) {
       const candidate = latin[1];
       const start = idx - candidate.length;
+      const capitalized = /^[A-Z]/.test(candidate);
       if (
-        candidate.length >= 1 &&
+        candidate.length >= (capitalized ? 1 : 2) &&
         candidate.length <= 24 &&
         !LATIN_NOISE.has(candidate.toLowerCase()) &&
-        !allow?.has(candidate)
+        !allow?.has(candidate) &&
+        // 小写英文词（之前/now/some/…）不是名字；拼音名 zhiqian 不在词典里，照常认
+        (capitalized || !isEnglishWord(candidate))
       ) {
         hits.push({ start, end: idx, value: candidate });
       }
@@ -90,18 +126,18 @@ function findTeacherNames(text: string, allow?: Set<string>): NameHit[] {
         const candidate = run.slice(-len);
         const start = idx - len;
         const prev = start > 0 ? text[start - 1] : "";
-        if (allow?.has(candidate) || TEACHER_NOISE.has(candidate) || NAME_NOISE.has(candidate)) continue;
+        if (allow?.has(candidate) || TEACHER_NOISE.has(candidate) || isCommonWord(candidate)) continue;
 
         let ok = false;
         if (len === 1) {
           // 单字只在「姓 + 边界」时算人名，避免「语文老师」里的「文」
           ok = SURNAMES.has(candidate) && !isHan(prev);
         } else if (len === 2) {
-          ok = SURNAMES.has(candidate[0]) || !isHan(prev) || FUNCTION_CHARS.has(prev);
+          ok = (SURNAMES.has(candidate[0]) || !isHan(prev) || FUNCTION_CHARS.has(prev)) && !isCommonWord(candidate);
         } else if (len === 3) {
-          ok = isPlausibleName(candidate);
+          ok = isPlausibleName(candidate) && !isCommonWord(candidate);
         } else {
-          ok = COMPOUND_SURNAMES.has(candidate.slice(0, 2)) && !NAME_NOISE.has(candidate);
+          ok = COMPOUND_SURNAMES.has(candidate.slice(0, 2)) && !isCommonWord(candidate);
         }
         if (!ok) continue;
         hits.push({ start, end: idx, value: candidate });
