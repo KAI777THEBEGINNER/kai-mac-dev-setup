@@ -87,6 +87,16 @@ before_provider_request ─兜底脱敏 + 泄漏断言→ 云端
 
 关闭启发式：词表里加 `"nameHeuristics": false`，或启动时 `PII_GUARD_HEURISTICS=0`。
 
+## 未知人名的学习范围（2026-10-23 修正）
+
+只在**用户自己写的文本**里学人名。助手回复、工具结果、文档示例里的「X老师」不参与学习——
+否则 README/测试里的一句示例就能把普通词（「之前」「而是」）永久变成占位符。
+
+另外两条防误伤规则：
+
+- 双字候选的末字是语法字（是/就/还是/但是/已经…）时不算人名
+- 小写拉丁候选如果能在系统词典 `/usr/share/dict/words` 里查到（`before`、`some`、`since`），也不算人名；拼音名（`zhangqian`）查不到，照常认
+
 ## 上下文压缩（compaction）
 
 pi 的压缩直接调裸 streamFn，绕过全部钩子。本扩展在 `session_before_compact` 里**就地脱敏**要发给模型的三处内容
