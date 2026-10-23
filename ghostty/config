@@ -3,18 +3,15 @@
 # 同一家族里宽度是 style 而不是 family，Ghostty 选不了宽度：只装 SemiCondensed，
 # Normal 宽度备份在 ~/.local/share/fonts-backup/IoskeleyMono-Normal/
 # 没装字体时 Ghostty 会回退到自带的 JetBrains Mono，效果也不差
-font-family = Ioskeley Mono Term
-# 中文回退：Sarasa Term SC（更纱黑体，基于思源黑体 + Iosevka，为终端设计）
-# 装法见 README；没装则落到系统 PingFang SC
+# 拉丁部分也用 Sarasa 自带的那套（Iosevka 派生）：默认斜杠 0、真斜体（转折圆润）。
+# Ioskeley Mono Term 的 0 是点状、斜体是 oblique（机械倾斜），放在后面只做兜底。
 font-family = Sarasa Term SC
+font-family = Ioskeley Mono Term
 font-family = PingFang SC
 
 # 默认字号：系统默认 13 + 3（等价于每次启动自动按三次 Cmd+=）
 # 只设启动初始值，不锁死，Cmd+= / Cmd+- / Cmd+0 仍可随时调整
 font-size = 16
-
-# 0 默认带点（Ioskeley 的默认设计）；打开 OpenType 的 zero 特性换成斜杠 0
-font-feature = zero
 
 # 禁用窗口状态恢复，防止 macOS 自动回到之前的 Claude Code session
 window-save-state = never
