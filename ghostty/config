@@ -9,9 +9,9 @@ font-family = Ioskeley Mono Term
 font-family = Sarasa Term SC
 font-family = PingFang SC
 
-# 默认字号：系统默认 13 + 1（等价于每次启动自动按一次 Cmd+=）
+# 默认字号：系统默认 13 + 3（等价于每次启动自动按三次 Cmd+=）
 # 只设启动初始值，不锁死，Cmd+= / Cmd+- / Cmd+0 仍可随时调整
-font-size = 15
+font-size = 16
 
 # 禁用窗口状态恢复，防止 macOS 自动回到之前的 Claude Code session
 window-save-state = never
