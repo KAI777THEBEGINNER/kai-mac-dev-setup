@@ -31,11 +31,7 @@ bash install.sh
 3. 可选：装终端字体（不装也能用，Ghostty 回退到自带 JetBrains Mono + PingFang SC）
 
 ```bash
-# 英文：Ioskeley Mono Term，只要 SemiCondensed 宽度
-curl -L -o /tmp/ios.zip https://github.com/ahatem/IoskeleyMono/releases/latest/download/IoskeleyMono-Term.zip
-unzip -j /tmp/ios.zip "SemiCondensed/Hinted/*" -d ~/Library/Fonts/IoskeleyMono
-
-# 中文：更纱黑体 Sarasa Term SC（需要 7z：brew install p7zip）
+# 中英文一体：更纱黑体 Sarasa Term SC（需要 7z：brew install p7zip）
 curl -L -o /tmp/sarasa.7z https://github.com/be5invis/Sarasa-Gothic/releases/download/v1.0.42/SarasaTermSC-TTF-1.0.42.7z
 7z x -y -o/tmp/sarasa /tmp/sarasa.7z
 mkdir -p ~/Library/Fonts/SarasaTermSC && cp /tmp/sarasa/*.ttf ~/Library/Fonts/SarasaTermSC/
@@ -43,13 +39,13 @@ mkdir -p ~/Library/Fonts/SarasaTermSC && cp /tmp/sarasa/*.ttf ~/Library/Fonts/Sa
 
 装了新字体 Ghostty 却没认出来：`atsutil databases -removeUser`，再重开 Ghostty。
 
-**Ioskeley 不要装 Normal 宽度**：CoreText 会把两种宽度并成同一个 family，Ghostty 只按 family 匹配，会永远用 Normal。
+**族名要写完整**：`Sarasa Term SC` 是族名；不要写成 `Sarasa-Term-SC-Regular`，也不要往族名里拼样式——像 `Ioskeley Mono Term Semi-Condensed` 这种写法，Ghostty 会当成不存在的族名静默回退，字体就“悄悄变了”。
 
 中文字体备选（换掉 `font-family = Sarasa Term SC` 那一行即可）：
 
 | 字体 | 风格 | 安装 |
 |---|---|---|
-| Sarasa Term SC（现用） | 思源黑体 + Iosevka，终端专用，和 Ioskeley 气质最接近 | 上面那段 |
+| Sarasa Term SC（现用） | 中英文一体：Iosevka 拉丁 + 思源黑体中文，两个英文 = 一个汉字 | 上面那段 |
 | Sarasa Fixed SC | 同上，标点/全角更规整 | `brew install --cask font-sarasa-gothic`（843 MB，全系列） |
 | Maple Mono CN | 圆润、连字多，中文是思源黑体子集 | `brew install --cask font-maple-mono-cn` |
 | LXGW WenKai | 楷体，阅读舒服，笔画细 | `brew install --cask font-lxgw-wenkai` |
@@ -104,7 +100,7 @@ git add -A && git commit -m "Update terminal config"
 | `~/.pi/agent/pii-guard/` | 脱敏词表与映射含真值，绝不入库 |
 | `~/.pi/agent/npm/` | pi 扩展包缓存，`install.sh` 会按 `settings.json` 的 `packages` 重装 |
 | `~/.local/bin/` 里的二进制与符号链接 | 不是配置 |
-| `~/Library/Fonts/IoskeleyMono/` | 字体文件（OFL 1.1，可以自行下载），不进仓库；只装 SemiCondensed 宽度 |
+| `~/Library/Fonts/SarasaTermSC/` | 字体文件（OFL 1.1），不进仓库 |
 
 完整清单见 `manifest.json` 的 `excluded` 字段。
 

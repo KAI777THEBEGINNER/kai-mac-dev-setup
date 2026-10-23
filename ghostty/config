@@ -1,12 +1,10 @@
 # Ghostty 自定义 Shader 配置
-# 英文：Ioskeley Mono Term（SemiCondensed 宽度）
-# 同一家族里宽度是 style 而不是 family，Ghostty 选不了宽度：只装 SemiCondensed，
-# Normal 宽度备份在 ~/.local/share/fonts-backup/IoskeleyMono-Normal/
-# 没装字体时 Ghostty 会回退到自带的 JetBrains Mono，效果也不差
-# 拉丁部分也用 Sarasa 自带的那套（Iosevka 派生）：默认斜杠 0、真斜体（转折圆润）。
-# Ioskeley Mono Term 的 0 是点状、斜体是 oblique（机械倾斜），放在后面只做兜底。
+# 中英文都用更纱黑体 Sarasa Term SC：
+#   拉丁 = Iosevka（0.5em），中文 = 思源黑体（1em），两个英文严格等于一个汉字
+#   0 是斜杠，斜体是真斜体（转折圆润）
+# 只留这一个字体族 + 系统中文兜底：多挂一个西文字体会在缺字时造成混排。
+# 没装字体时 Ghostty 回退到自带 JetBrains Mono + PingFang SC。
 font-family = Sarasa Term SC
-font-family = Ioskeley Mono Term
 font-family = PingFang SC
 
 # 默认字号：系统默认 13 + 3（等价于每次启动自动按三次 Cmd+=）
