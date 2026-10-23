@@ -13,6 +13,9 @@ font-family = PingFang SC
 # 只设启动初始值，不锁死，Cmd+= / Cmd+- / Cmd+0 仍可随时调整
 font-size = 16
 
+# 0 默认带点（Ioskeley 的默认设计）；打开 OpenType 的 zero 特性换成斜杠 0
+font-feature = zero
+
 # 禁用窗口状态恢复，防止 macOS 自动回到之前的 Claude Code session
 window-save-state = never
 
