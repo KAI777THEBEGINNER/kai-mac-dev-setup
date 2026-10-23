@@ -154,6 +154,20 @@ export class Masker {
     this.buckets.set(key, bucket);
   }
 
+  /**
+   * 当前 masker 真正会处理的值（词表 + 运行期学到的）。
+   *
+   * 泄漏断言只能检查这些值：state 里还留着**上个进程**学过的词（reload 后
+   * learned 集合已清空），它们不再参与 mask，若仍拿来断言，每轮都会误报
+   * 「未脱敏残留」并强制替换（2026-10-23 实测 65 处/轮，含 then/not 这种词）。
+   */
+  has(value: string): boolean {
+    if (this.allow.has(value)) return false;
+    if (this.learned.has(value)) return true;
+    const bucket = this.buckets.get(value[0].toLowerCase());
+    return !!bucket?.some((e) => e.value === value);
+  }
+
   /** 词表 + 正则 + 未知人名启发式的全部命中，未去重 */
   scan(text: string, opts: { learn?: boolean } = {}): FoundMatch[] {
     const out: FoundMatch[] = [];

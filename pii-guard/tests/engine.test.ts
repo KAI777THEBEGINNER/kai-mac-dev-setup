@@ -162,3 +162,14 @@ test("学习范围：默认会登记，后续裸提及也被挡", () => {
   m.mask("王四老师说的", st);
   assert.ok(m.mask("王四来了", st).includes(tokenOf("PERSON", 1)));
 });
+
+
+test("泄漏断言范围：has 只认当前能命中的值", () => {
+  const m = new Masker({ version: 1, people: [{ label: "PERSON", canonical: "李叁" }] });
+  assert.equal(m.has("李叁"), true);
+  assert.equal(m.has("张叁"), false);
+  const st = emptyState();
+  m.mask("王四老师说的", st);
+  assert.equal(m.has("王四"), true);
+  assert.equal(m.has("赵六"), false);
+});

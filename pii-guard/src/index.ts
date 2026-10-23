@@ -317,7 +317,7 @@ export default function (pi: ExtensionAPI) {
   const forceMask = (s: string): string => {
     let out = s;
     for (const [value, token] of Object.entries(state.values)) {
-      if (value.length >= 2 && out.includes(value)) out = out.split(value).join(token);
+      if (value.length >= 2 && masker.has(value) && out.includes(value)) out = out.split(value).join(token);
     }
     return out;
   };
@@ -347,6 +347,9 @@ export default function (pi: ExtensionAPI) {
       const hits: Array<{ value: string; token: string }> = [];
       for (const [value, token] of Object.entries(state.values)) {
         if (value.length < 2) continue;
+        // 只检查当前仍能命中的值：reload 后旧 learned 词不再参与 mask，
+        // 再拿它们断言就是每轮固定误报（见 Masker.has 注释）
+        if (!masker.has(value)) continue;
         for (const s of strings) {
           if (s.length > MAX_TEXT || isBinaryLike(s)) continue;
           let idx = s.indexOf(value);
