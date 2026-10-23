@@ -17,10 +17,10 @@ font-size = 15
 window-save-state = never
 
 # 视口高度通常不是行高的整数倍，余数默认全堆在底部/右侧，看起来像多了一行空白。
-# step-resize：手动拖窗口时按整格吸附，从根上消掉余数；
-# balance：万一余数还在，上下各分一半（最多半行），不会全挤在底部。
+# step-resize：手动拖窗口时按整格吸附，从根上消掉余数。
+# 不要加 window-padding-balance：它把余数分到四边，网格起点落到半像素上，
+# 中文句号「。」的环形会被拉成正圆（2026-10-24 实测），失去原有的竖椭圆观感。
 window-step-resize = true
-window-padding-balance = true
 
 # 启动 zsh，由 .zshrc 自动拉起 zellij
 command = zsh -il
