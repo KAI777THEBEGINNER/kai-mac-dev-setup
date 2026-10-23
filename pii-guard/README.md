@@ -3,7 +3,7 @@
 pi agent 的**出站脱敏层**：内容发往云端模型之前，把身份信息换成 `<<LABEL:N>>` 占位符；
 模型回复和写文件的参数再在本地还原成真值。
 
-- **对模型**：张三 → `zhangsan3`，13800000000 → `13812345678`
+- **对模型**：张叁 → `<<PERSON:1>>`，13800000000 → `13812345678`
 - **对你**：回复照常显示真值，写进文件的也是真值
 - **全程本地**：检测、映射、还原都在本机，原文不出本机
 
@@ -127,7 +127,7 @@ node tools/init.mjs --print    # 只看模板，不写盘
 {
   "version": 1,
   "people": [
-    { "label": "PERSON", "canonical": "张三", "aliases": ["小张", "zhangsan"] },
+    { "label": "PERSON", "canonical": "张三", "aliases": ["小张", "张叁"] },
     { "label": "ORG", "canonical": "示例大学", "aliases": ["示例大"] }
   ],
   "extraPatterns": [{ "label": "STUDENT_ID", "regex": "\\b2021\\d{7}\\b", "description": "学号" }],

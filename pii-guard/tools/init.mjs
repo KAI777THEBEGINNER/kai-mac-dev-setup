@@ -18,12 +18,12 @@ const WORDLIST = {
   people: [
     {
       label: "PERSON",
-      canonical: "zhangsan",
-      aliases: ["zhangsan1", "zhangsan2", "zhangsan3", "zhangsan4", "zhangsan5", "TODO-你的中文全名"],
+      canonical: "张叁",
+      aliases: ["小张", "阿叁", "TODO-你的中文全名"],
     },
     { label: "PERSON", canonical: "李四", aliases: ["李叁"] },
     { label: "PERSON", canonical: "王五", aliases: ["王叁"] },
-    { label: "PERSON", canonical: "赵六", aliases: ["赵叁", "zhaoliu"] },
+    { label: "PERSON", canonical: "赵六", aliases: ["赵叁", "赵六"] },
     { label: "PERSON", canonical: "孙七", aliases: ["孙叁"] },
     { label: "PERSON", canonical: "周八", aliases: [] },
     { label: "PERSON", canonical: "吴九", aliases: ["吴叁"] },

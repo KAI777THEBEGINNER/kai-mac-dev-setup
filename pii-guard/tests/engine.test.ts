@@ -11,7 +11,7 @@ const WORDLIST: Wordlist = {
   version: 1,
   people: [
     { label: "PERSON", canonical: "李四", aliases: ["李叁"] },
-    { label: "PERSON", canonical: "zhangsan", aliases: ["zhangsan4", "zhangsan5", "zhangsan3"] },
+    { label: "PERSON", canonical: "张叁", aliases: ["张叁四", "张叁五", "张叁三"] },
   ],
 };
 
@@ -55,9 +55,9 @@ test("银行卡：Luhn 有效才挡，订单号不误伤", () => {
 
 test("人名与别名：同一实体不同写法分别保真", () => {
   const { m, s } = fresh();
-  const masked = m.mask("李叁和李四都提到了 zhangsan4", s);
+  const masked = m.mask("李叁和李四都提到了 张叁四", s);
   assert.equal(masked, "<<PERSON:1>>和<<PERSON:2>>都提到了 <<PERSON:3>>");
-  assert.equal(m.restore(masked, s), "李叁和李四都提到了 zhangsan4");
+  assert.equal(m.restore(masked, s), "李叁和李四都提到了 张叁四");
 });
 
 test("英文名边界：只看词首——前面是字母才不命中（2026-10-13 修复）", () => {

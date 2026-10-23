@@ -51,7 +51,7 @@
 
 | 资产 | 举例（代号） |
 |---|---|
-| 用户本人标识 | 中文全名、`zhangsan`、拼音、英文自称（6 种写法） |
+| 用户本人标识 | 中文全名、`张叁`、拼音、英文自称（6 种写法） |
 | 联系方式 | 手机号、私人邮箱、微信/支付宝 |
 | 第三方人名 | 学术推荐人 2 人、中介顾问 3 人、实习上级 1 人 |
 | 证件与金融 | 身份证、护照、银行卡 |
@@ -158,7 +158,7 @@
 ### 3.4 关键设计决策
 
 **1. 按「值」分配 token，不按「实体」归并。**
-同一实体的不同写法（`李四` 与 `李叁`）得到**不同** token。代价是模型看到"两个占位符"，收益是还原 100% 保真——文本里写的是 `zhangsan4` 就还原成 `zhangsan4`，不会变成 `zhangsan`。对"写回文件"场景，保真优先于简洁。
+同一实体的不同写法（`李四` 与 `李叁`）得到**不同** token。代价是模型看到"两个占位符"，收益是还原 100% 保真——文本里写的是 `张叁四` 就还原成 `张叁四`，不会变成 `张叁`。对"写回文件"场景，保真优先于简洁。
 
 **2. 幂等性。** `mask(mask(x)) === mask(x)`：占位符本身不匹配任何规则。这是"每轮重新脱敏全历史"能成立的前提。
 
@@ -181,7 +181,7 @@ mask/restore 的每一步都包在 try/catch 里，出错时静默返回原文�
 **词表匹配**（`src/engine.ts`，用户维护的真人名）：
 
 - 构建首字符索引：`值首字符 → 候选列表`，扫描时逐位置查表，避免 O(词表数 × 文本长度) 的全量扫描
-- ASCII 边界：含字母/数字的别名（如 `zhangsan4`）要求前后不能是 `[A-Za-z0-9_]`，防止命中 `Kaiserreich`；纯中文别名不做边界检查（中文无空格，做了反而全失效）
+- ASCII 边界：含字母/数字的别名（如 `张叁四`）要求前后不能是 `[A-Za-z0-9_]`，防止命中 `Kaiserreich`；纯中文别名不做边界检查（中文无空格，做了反而全失效）
 - 大小写不敏感；单字符别名被拒绝（防误伤）
 
 **正则规则**（`src/rules.ts`，18 条）：
@@ -265,7 +265,7 @@ if (leak) throw new Error("pii-guard 阻断：payload 里仍有未脱敏内容�
 | 2 | 工具结果（read/grep/ls/bash 输出） | `tool_result` 脱敏 + `context` 兜底 | ✅ 已实测（真实 vault 文件，审计零泄漏） |
 | 3 | 工具参数（模型产出，含 path/content/command） | `tool_call` 还原（脱敏方向由 `context` 处理 arguments） | ✅ 已实测（写文件落真值） |
 | 4 | 助手回复（含 thinking） | `message_end` 还原 | ✅ 已实测 |
-| 5 | system prompt（含 `/Users/<用户名>/` 与工具说明） | `before_provider_request` 全局字符串兜底 | ✅ 已实测（`zhangsan3` 被替换） |
+| 5 | system prompt（含 `/Users/<用户名>/` 与工具说明） | `before_provider_request` 全局字符串兜底 | ✅ 已实测（`张叁三` 被替换） |
 | 6 | 自定义扩展注入的消息（`custom` role） | 仅靠兜底 | ⚠️ `context` 层不处理（`mapMessage` 只认 user/assistant/toolResult） |
 | 7 | 用户 bash 执行的输出（`bashExecution` role） | 仅靠兜底 | ⚠️ 同上 |
 | 8 | 压缩摘要（`compactionSummary` / `branchSummary`） | 干净模式下存储即脱敏；还原模式下 `session_before_compact` 拦截 | ⚠️→✅ 已修（S2） |

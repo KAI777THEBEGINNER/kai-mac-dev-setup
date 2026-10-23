@@ -152,8 +152,8 @@ d) 先把 AGENTS.md:47 引用的 `tools/selfcheck.mjs` 补上——它不存在�
    system prompt 与工具说明裸奔。已安装 pi-subagents，每次委派任务都在走这条路。
 3. **断言触发瞬间的原始 payload**（S1 事实 2）：检测到泄漏的行为本身把兜底层拆掉。
 4. **`/pii clear` 后的间接污染**（S4，探针实测）：clear 后 counters 归零，新值重新占用
-   `zhangsan3`，与历史残留同名 token 在**同一 payload 内指向两个不同真值**（复现：历史
-   `zhangsan3`=张三丰，新消息 `zhangsan3`=李四）。模型引用旧 token 写文件 → `tool_call` 还原
+   `张叁三`，与历史残留同名 token 在**同一 payload 内指向两个不同真值**（复现：历史
+   `张叁三`=张三丰，新消息 `张叁三`=李四）。模型引用旧 token 写文件 → `tool_call` 还原
    写入错误真值 → 静默数据损坏。5.2-9 把同源问题（resume 丢 state）轻描淡写为「还原失败，不泄漏」
    ——实际是**错误还原**，且 clear 的后果文档完全没提。
 5. **session jsonl 二次使用**：session 按设计存真值（5.1-11 已披露本地留存），但「用户把 session 文件
@@ -215,5 +215,5 @@ d) 先把 AGENTS.md:47 引用的 `tools/selfcheck.mjs` 补上——它不存在�
 | BANK_CARD 长度 16-19 | `src/rules.ts:58-60` |
 | extraPatterns 无容错 | `src/engine.ts:88` |
 | Amex/Diners/GLM key 漏检复现 | 探针脚本（临时），输入 `378282246310005` 等实测原样通过 |
-| /pii clear token 污染复现 | 探针脚本：历史 `zhangsan3`=张三丰，clear 后新消息 `zhangsan3`=李四，同 payload 并存 |
+| /pii clear token 污染复现 | 探针脚本：历史 `张叁三`=张三丰，clear 后新消息 `张叁三`=李四，同 payload 并存 |
 | 单测命令失效 | Node 24.11.1 下 `node --test tests/` 报 MODULE_NOT_FOUND；`node --test tests/engine.test.ts` 11 例全绿 |

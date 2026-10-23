@@ -6,12 +6,12 @@
     {
       "label": "PERSON",
       "canonical": "张三",
-      "aliases": ["小张", "zhangsan", "Zhang San"]
+      "aliases": ["小张", "阿叁"]
     },
     {
       "label": "PERSON",
       "canonical": "李四",
-      "aliases": ["lisi"]
+      "aliases": ["李肆"]
     },
     {
       "label": "ORG",
