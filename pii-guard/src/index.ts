@@ -14,7 +14,7 @@
  *     好处：session 文件、自动压缩（compaction 直接调裸 streamFn，绕过全部钩子）、
  *     子代理读取历史时都不含真值。
  *   - RPC / print / json（cleanStorage=false）：消息按真值入库（用户与插件要读懂），
- *     出站靠 before_provider_request 就地兜底；压缩前由 session_before_compact 拦截。
+ *     出站靠 before_provider_request 就地兜底；压缩前由 session_before_compact 就地脱敏（不阻塞）。
  *
  * 失败策略：全程 fail-open（出错不阻断工作流）。pi 会吞掉 handler 抛错并回退到
  * 上一份 payload，所以"抛错阻断"在 pi 里不成立（审核发现 S1），断言改为就地强替换 + 告警。
@@ -221,6 +221,39 @@ function mapMessage(msg: unknown, fn: StrFn, maskArguments: boolean): unknown {
     return { ...m, content: mapBlocks(m.content, fn, maskArguments) };
   }
   return msg;
+}
+
+/** session_before_compact 事件里我们关心的字段（pi 用同一个 preparation 对象生成压缩请求） */
+export interface CompactionLikeEvent {
+  preparation: {
+    messagesToSummarize?: unknown[];
+    turnPrefixMessages?: unknown[];
+    previousSummary?: string;
+  };
+  customInstructions?: string;
+}
+
+/**
+ * 就地脱敏压缩输入。
+ *
+ * pi 的 compaction 直接调裸 streamFn，绕过 context / before_provider_request 等钩子；
+ * 但 agent-session 传给 compact() 的就是这个 preparation 对象，所以原地改写属性即可让
+ * 压缩请求拿到占位符，不需要取消压缩。
+ *
+ * 注意：`customInstructions`（手动 /compact 时用户当场打的那句话）pi 是从局部变量取的，
+ * 改 event 上的副本不生效，这里只做记录，不做脱敏。
+ */
+export function maskCompactionInput(event: CompactionLikeEvent, mask: StrFn): void {
+  const prep = event.preparation;
+  if (Array.isArray(prep.messagesToSummarize)) {
+    prep.messagesToSummarize = prep.messagesToSummarize.map((m) => mapMessage(m, mask, true));
+  }
+  if (Array.isArray(prep.turnPrefixMessages)) {
+    prep.turnPrefixMessages = prep.turnPrefixMessages.map((m) => mapMessage(m, mask, true));
+  }
+  if (typeof prep.previousSummary === "string") {
+    prep.previousSummary = mask(prep.previousSummary);
+  }
 }
 
 /** 终端 ANSI 浅橙（256 色 215），跟随 ghostty/终端主题；与 ~/.pi/agent/themes/soft.json 的 warning 同色 */
@@ -527,26 +560,35 @@ export default function (pi: ExtensionAPI) {
   });
 
   // ---- 压缩兜底：compaction 直接调裸 streamFn，绕过 context 与本扩展的其它钩子 ----
-  pi.on("session_before_compact", async (event, ctx) => {
+  // 2026-10-22 改：不再取消压缩（用户要求 compact 永不被阻塞），改成就地脱敏输入。
+  pi.on("session_before_compact", async (event) => {
     try {
-      const bag: string[] = [];
-      collectStrings((event as { branchEntries?: unknown }).branchEntries, bag);
-      collectStrings((event as { preparation?: unknown }).preparation, bag);
-      const joined = bag.join("\n");
-      for (const value of Object.keys(state.values)) {
-        if (value.length >= 2 && joined.includes(value)) {
-          ctx.ui.notify(
-            "pii-guard：本次上下文压缩的内容里含有真实身份信息，已阻止压缩以防泄漏。" +
-              "建议 /new 开新会话；确需压缩可设 PII_GUARD_ALLOW_COMPACT=1 后重试。",
-            "warning",
-          );
-          if (process.env.PII_GUARD_ALLOW_COMPACT !== "1") return { cancel: true };
-          break;
+      maskCompactionInput(event as CompactionLikeEvent, mask);
+      // 兜底断言：只检查真正会发出去的内容（fileOps 里的本地路径不算）
+      const prep = event.preparation as CompactionLikeEvent["preparation"];
+      const leaks = findAllLeaks({
+        messagesToSummarize: prep.messagesToSummarize,
+        turnPrefixMessages: prep.turnPrefixMessages,
+        previousSummary: prep.previousSummary,
+      });
+      if (leaks.length > 0) {
+        try {
+          const fd = openSync(path.join(GUARD_DIR, "leaks.log"), "a", 0o600);
+          try {
+            writeSync(
+              fd,
+              `${JSON.stringify({ ts: new Date().toISOString(), session: sessionId, where: "compact", leaks: leaks.map((l) => l.token) })}\n`,
+            );
+          } finally {
+            closeSync(fd);
+          }
+        } catch {
+          /* 记日志失败不影响压缩 */
         }
       }
-      return undefined;
+      return undefined; // 不取消：压缩照常进行
     } catch {
-      return undefined;
+      return undefined; // fail-open：脱敏失败也不阻塞压缩
     }
   });
 

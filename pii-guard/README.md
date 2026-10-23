@@ -87,6 +87,13 @@ before_provider_request ─兜底脱敏 + 泄漏断言→ 云端
 
 关闭启发式：词表里加 `"nameHeuristics": false`，或启动时 `PII_GUARD_HEURISTICS=0`。
 
+## 上下文压缩（compaction）
+
+pi 的压缩直接调裸 streamFn，绕过全部钩子。本扩展在 `session_before_compact` 里**就地脱敏**要发给模型的三处内容
+（`messagesToSummarize`、`turnPrefixMessages`、`previousSummary`），然后放行——**压缩永远不会被取消**。
+
+例外：手动 `/compact 你的指令` 里当场打的那句话，pi 是从局部变量取的，扩展改不到，若其中含真实姓名仍会原样发出。
+
 ## 安装（本仓库内）
 
 `manifest.json` 已经把本目录映射到 `~/.pi/agent/extensions/pii-guard`，
