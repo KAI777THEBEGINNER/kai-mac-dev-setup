@@ -20,5 +20,6 @@
   "extensions": [
     "{{HOME}}/.pi/agent/extensions/pii-guard/index.ts"
   ],
-  "doubleEscapeAction": "tree"
+  "doubleEscapeAction": "tree",
+  "showHardwareCursor": true
 }
