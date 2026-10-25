@@ -120,3 +120,17 @@
 ## 其他文件
 
 `LICENSE`、`bin/ghostty-bg`、`bin/ghostty-reload`、`ghostty/background.conf`、`ghostty/config`、`ghostty/custom_shader/bettercrt.glsl`、`ghostty/custom_shader/cursor_blaze.glsl`、`ghostty/custom_shader/starfield.glsl`、`ghostty/custom_shader/starfield_downloaded.glsl`、`ghostty/shaders/shader.glsl`、`manifest.json`、`pi/extensions/pi-computer-use.json`、`pi/keybindings.json`、`pi/models.json`、`pi/patches/v1-bar-jump-已禁用/interactive-mode.js.kpatch`、`pi/patches/v1-bar-jump-已禁用/tui-alt-screen.js.kpatch`、`pi/patches/v1-bar-jump-已禁用/user-message.js.kpatch`、`pi/patches/v2-jump-2026-08-23-assistant-message.js.kpatch`、`pi/patches/v2-jump-2026-08-23-keybindings.js.kpatch`、`pi/patches/v2-jump-2026-08-23-tui-alt-screen.js.kpatch`、`pi/patches/v2-jump-2026-08-23-user-message.js.kpatch`、`pi/pi-dsh-minimal.json`、`pi/settings.json`、`pi/skills/agent-webbridge/tools.json`、`pi/skills/human-writing/LICENSE`、`pi/skills/human-writing/VERSION`、`pi/skills/human-writing/agents/openai.yaml`、`pi/skills/lieflat-charts/LICENSE`、`pi/skills/lieflat-charts/agents/openai.yaml`、`pi/skills/lieflat-charts/examples/lenny-2026-survey.html`、`pi/skills/lieflat-charts/templates/basics-gallery.html`、`pi/skills/lieflat-charts/templates/big-circular.html`、`pi/skills/lieflat-charts/templates/big-force.html`、`pi/skills/lieflat-charts/templates/big-threads.html`、`pi/skills/lieflat-charts/templates/color/basics-palm.html`、`pi/skills/lieflat-charts/templates/color/basics-porcelain.html`、`pi/skills/lieflat-charts/templates/color/basics-wire.html`、`pi/skills/lieflat-charts/templates/color/big-circular-palm.html`、`pi/skills/lieflat-charts/templates/color/big-circular-porcelain.html`、`pi/skills/lieflat-charts/templates/color/big-force-palm.html`（共 57 个，仅列前 40）
+
+## Finder 文件夹入口（2026-10-26）
+
+- `finder/直接在Ghostty中打开.workflow` → `~/Library/Services/`，接收文件夹的 Finder 快速操作。
+- `bin/ghostty-open-folder` → `~/.local/bin/`，首次启动 Ghostty 时指定 cwd；已打开时找到前台终端的 Zellij session，向右新建指定 cwd 的 pane，复用现有窗口。
+- `manifest.json` 包含上述两个同步项。
+- Finder 菜单注册必须包含 `NSRequiredContext = {}`，否则服务会进入缓存但默认不显示。
+- 本机已启用 `pbs` 中该项的 `presentation_modes.ContextMenu`，刷新 Finder 后实测「文件夹右键 → Quick Actions → 直接在Ghostty中打开」可见；顶栏 Services 可见不能代替右键验证。
+
+## Ghostty 配置核对（2026-10-26）
+
+- `ghostty/macos-preferences.plist` → `~/Library/Preferences/com.mitchellh.ghostty.plist`，由 manifest 的 `ghostty-macos-preferences` 同步，包含 macOS 偏好和最近窗口位置；应用时先退出 Ghostty。
+- Ghostty 当前主配置只引入 `background.conf`，后者引用 3 个 shader；仓库同时保留另外 2 个本机 shader 源文件。
+- 历史配置备份、shader 草稿、未引用自动主题与旧会话临时升级脚本不属于同步范围。

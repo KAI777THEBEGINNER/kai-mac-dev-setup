@@ -21,6 +21,13 @@
       "target": "~/.config/ghostty/background.conf"
     },
     {
+      "id": "ghostty-macos-preferences",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "ghostty/macos-preferences.plist",
+      "target": "~/Library/Preferences/com.mitchellh.ghostty.plist"
+    },
+    {
       "id": "ghostty-shaders",
       "group": "terminal",
       "kind": "tree",
@@ -238,6 +245,20 @@
         "*.py",
         "*.sh"
       ]
+    },
+    {
+      "id": "bin-ghostty-open-folder",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "bin/ghostty-open-folder",
+      "target": "~/.local/bin/ghostty-open-folder"
+    },
+    {
+      "id": "finder-ghostty-open-folder",
+      "group": "terminal",
+      "kind": "tree",
+      "repo": "finder/直接在Ghostty中打开.workflow",
+      "target": "~/Library/Services/直接在Ghostty中打开.workflow"
     }
   ],
   "excluded": [

@@ -1,0 +1,100 @@
+#!/usr/bin/python3
+"""Finder Quick Action: reuse Ghostty and open folders in right-hand Zellij panes."""
+import os
+from pathlib import Path
+import shlex
+import subprocess
+import sys
+import time
+
+GHOSTTY = "com.mitchellh.ghostty"
+ZELLIJ = str(Path.home() / ".local/bin/zellij")
+if not Path(ZELLIJ).exists():
+    ZELLIJ = "/opt/homebrew/bin/zellij"
+ENV = os.environ.copy()
+for key in ("ZELLIJ", "ZELLIJ_SESSION_NAME", "ZELLIJ_PANE_ID"):
+    ENV.pop(key, None)
+
+
+def run(*args):
+    return subprocess.run(args, check=True, text=True, stdout=subprocess.PIPE,
+                          stderr=subprocess.PIPE, env=ENV).stdout.strip()
+
+
+def applescript(source, *args):
+    return run("/usr/bin/osascript", "-e", source, "--", *args)
+
+
+def front_session():
+    # Read the actual front terminal's process, rather than guessing a session by age.
+    info = applescript('''tell application "Ghostty"
+        if (count of windows) is 0 then return ""
+        set term to focused terminal of selected tab of front window
+        return (pid of term) as text
+    end tell''')
+    if not info:
+        return None
+    command = shlex.split(run("/bin/ps", "-p", info, "-o", "command="))
+    if not command or Path(command[0]).name != "zellij":
+        return None
+    for flag in ("--session", "-s"):
+        if flag in command:
+            return command[command.index(flag) + 1]
+    return None
+
+
+def wait_session():
+    deadline = time.monotonic() + 20
+    while time.monotonic() < deadline:
+        session = front_session()
+        if session:
+            return session
+        time.sleep(0.15)
+    raise RuntimeError("Ghostty 当前窗口没有就绪的 Zellij 会话。")
+
+
+def main(paths):
+    if not paths:
+        raise RuntimeError("请先选择文件夹。")
+    folders = []
+    for value in paths:
+        folder = str(Path(value).absolute())
+        if not Path(folder).is_dir():
+            raise RuntimeError("请选择文件夹：" + folder)
+        if folder not in folders:
+            folders.append(folder)
+    running = applescript('application "Ghostty" is running') == "true"
+    has_window = running and applescript('tell application "Ghostty" to count windows') != "0"
+    if not running:
+        # Startup cwd is inherited by zsh and the initial Zellij pane.
+        run("/usr/bin/open", "-b", GHOSTTY, "--args", "--working-directory=" + folders[0])
+        folders = folders[1:]
+    elif not has_window:
+        applescript('''on run argv
+            tell application "Ghostty"
+                new window with configuration {initial working directory:item 1 of argv}
+                activate
+            end tell
+        end run''', folders[0])
+        folders = folders[1:]
+    if folders:
+        session = wait_session()
+        for folder in folders:
+            # Equivalent to Ctrl+P, R, then cd; argv preserves spaces and shell metacharacters.
+            run(ZELLIJ, "--session", session, "action", "new-pane", "--direction", "right",
+                "--cwd", folder, "--", "/bin/zsh", "-il")
+    applescript('''tell application "Ghostty"
+        if (count of windows) > 0 then activate window front window
+        activate
+    end tell''')
+
+
+if __name__ == "__main__":
+    try:
+        main(sys.argv[1:])
+    except (RuntimeError, subprocess.CalledProcessError) as error:
+        detail = error.stderr.strip() if isinstance(error, subprocess.CalledProcessError) else str(error)
+        applescript('''on run argv
+            display alert "直接在Ghostty中打开" message (item 1 of argv) as warning
+        end run''', detail)
+        sys.exit(1)

@@ -71,10 +71,10 @@ git add -A && git commit -m "Update terminal config"
 
 | 分组 | 内容 | 目标位置 |
 |------|------|----------|
-| `ghostty/` | 主配置、`background.conf`（毛玻璃＋三个 shader，`ghostty-bg` 一键开关）、shader 源文件 | `~/.config/ghostty/` |
+| `ghostty/` | 主配置、背景、shader、macOS 偏好快照 | `~/.config/ghostty/`、`~/Library/Preferences/com.mitchellh.ghostty.plist` |
 | `zellij/` | 0.42 配置：自定义键位、内联金色主题 `gold` | `~/.config/zellij/config.kdl` |
 | `shell/` | `.zshrc`（zellij 单会话自动启动、PATH、Ghidra）、`.zprofile`（brew 镜像） | `~/` |
-| `bin/` | `ghostty-bg`（背景开关）、`ghostty-reload`（改 shader 后热重载） | `~/.local/bin/` |
+| `bin/` | `ghostty-bg`（背景开关）、`ghostty-reload`（热重载）、`ghostty-open-folder`（Finder 入口） | `~/.local/bin/` |
 | `pi/` | 行为规则 `AGENTS.md`、`settings.json`、`models.json`、快捷键、subagents、主题、6 个 agents、skills、扩展、脚本 | `~/.pi/agent/` |
 | `pii-guard/` | **byted_refined** 脱敏层：正则 + 词表 + 未知人名启发式 | `~/.pi/agent/extensions/pii-guard/` |
 
@@ -126,3 +126,19 @@ git add -A && git commit -m "Update terminal config"
 ## 六、第三方项目
 
 见 [THIRD_PARTY.md](./THIRD_PARTY.md)。我本人写的配置与脚本用 MIT License。
+
+## Finder 文件夹右键入口
+
+在 Finder 选中文件夹，右键 → Quick Actions（快速操作）→「直接在Ghostty中打开」。Ghostty 未启动时以该文件夹为初始目录启动；已有窗口时复用前台窗口，向右新建 Zellij pane（等同 Ctrl+P、R）并进入所选目录。支持多选，每个文件夹一个 pane。
+
+实现为 `finder/直接在Ghostty中打开.workflow` 和 `bin/ghostty-open-folder`，已纳入 manifest 同步。
+
+注册包含 `NSRequiredContext` 空字典、文件夹 UTI 和 `NSFilenamesPboardType`。本机 `pbs` 的 `NSServicesStatus` 中，该工作流的 `presentation_modes` 已启用 `ContextMenu`、`FinderPreview`、`ServicesMenu` 和 `TouchBar`，并已刷新 Finder 缓存。
+
+2026-10-26 验证：实际右键选中的 `shifu_SKILL` 文件夹，展开 Quick Actions，读取到可见菜单项「直接在Ghostty中打开」（有实际屏幕位置和尺寸）。顶栏 Services 菜单中的可见性不能代替此验证。工作流执行另已验证复用窗口、新建 pane、中文及含空格和引号的路径；未关闭现有会话来测试首次启动。
+
+## Ghostty 配置同步范围
+
+`ghostty/macos-preferences.plist` 保存本机 macOS 偏好快照，包括自动更新检查、窗口恢复和最近窗口位置。向新机器应用这份文件时应先退出 Ghostty，再运行安装脚本；正在运行的应用可能缓存或重新写入偏好。
+
+配置目录中的 `config.bak.*`、shader 的 `.bak.*` 和 `.glsl.txt`、未被引用的 `auto/theme.ghostty` 均不参与当前配置，不同步。`ghostty-tip-resume` 是绑定旧 Zellij 会话的临时升级入口，当前启动命令未引用它，也不入库。字体文件仍按安装说明单独安装。
