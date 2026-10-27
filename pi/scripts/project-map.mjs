@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-// codebase-map —— 为项目生成 CODEBASE.md 代码地图（pi 上下文资产）
+// project-map —— 为项目生成 PROJECT_MAP.md 项目空间地图（pi 上下文资产）
 //
-// 用法：node codebase-map.mjs [目标目录]
+// 用法：node project-map.mjs [目标目录]
 // 默认目标：当前目录；若在 git 仓库内，以仓库根为项目根。
-// 产出：<项目根>/CODEBASE.md（约 3-24KB，符号级摘要，不是源码全文）。
+// 产出：<项目根>/PROJECT_MAP.md（约 3-24KB，符号级摘要，不是源码全文）。
 //
 // 设计要点：
 //   1. 零依赖，只用 node 原生模块
@@ -173,7 +173,7 @@ function walk(dir, root, out, depth) {
       if (SOURCE_EXTS.has(ext)) {
         out.sources.push({ rel, full, ext });
       } else if (DOC_EXTS.has(ext)) {
-        if (name !== "CODEBASE.md") out.docs.push({ rel, full });
+        if (name !== "PROJECT_MAP.md") out.docs.push({ rel, full });
       } else if (!name.startsWith(".")) {
         out.other.push({ rel, ext });
       }
@@ -429,9 +429,9 @@ function main() {
   const projectName = basename(root);
 
   const sections = [];
-  sections.push(`# CODEBASE.md —— ${projectName} 代码地图`);
+  sections.push(`# PROJECT_MAP.md —— ${projectName} 项目空间地图`);
   sections.push("");
-  sections.push(`> 自动生成于 ${stamp}（pi codebase-map）。改动代码后运行 \`/map\` 刷新。`);
+  sections.push(`> 自动生成于 ${stamp}（pi project-map）。改动代码后运行 \`/map\` 刷新。`);
   sections.push(`> 用法：先读本图建立全局认知，再按需 read 具体文件；不要每次全量扫仓库。`);
   sections.push("");
   sections.push("## 总览");
@@ -481,7 +481,7 @@ function main() {
   }
   body = body.replace(/\n{3,}/g, "\n\n").trimEnd() + "\n";
 
-  const outPath = join(root, "CODEBASE.md");
+  const outPath = join(root, "PROJECT_MAP.md");
   writeFileSync(outPath, body, "utf8");
   console.log(`已生成 ${outPath}`);
   console.log(`  ${out.sources.length} 个源码文件，地图 ${(Buffer.byteLength(body) / 1024).toFixed(1)} KB`);

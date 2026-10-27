@@ -1,12 +1,12 @@
-// codebase-map —— pi 扩展：项目代码地图自动注入 + 维护命令
+// project-map —— pi 扩展：项目空间地图自动注入 + 维护命令
 //
 // 机制（与 AGENTS.md「代码地图」约定配套）：
-//   1. 会话启动时从 cwd 向上找 CODEBASE.md
+//   1. 会话启动时从 cwd 向上找 PROJECT_MAP.md
 //   2. 每次 agent 启动前，若地图存在且本会话尚未注入（或地图已更新），
 //      把地图全文作为 context message 注入一次 —— 后续轮次都带在历史里，
 //      Pi 不再需要每次全量重扫源码
 //   3. 没有地图的项目：启动时提醒一次「/map 生成」
-//   4. /map 命令 + codebase_map 工具：生成/刷新地图（调 scripts/codebase-map.mjs）
+//   4. /map 命令 + project_map 工具：生成/刷新地图（调 scripts/project-map.mjs）
 //
 // 防重复注入：message 里埋 mtime 标记；resume 会话时从历史恢复上次注入的 mtime，
 // 地图没变就不重复注入；地图刷新（mtime 变化）后下一轮自动注入新版。
@@ -18,16 +18,19 @@ import { homedir } from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 
-const MAP_NAME = "CODEBASE.md";
+const MAP_NAME = "PROJECT_MAP.md";
+const LEGACY_NAME = "CODEBASE.md"; // 旧名，存在且新名缺失时仍读，向后兼容
 const MAX_INJECT_BYTES = 24 * 1024;
-const MTIME_TAG = /<!-- codebase-map:mtime:(\d+) -->/;
-const SCRIPT = path.join(homedir(), ".pi", "agent", "scripts", "codebase-map.mjs");
+const MTIME_TAG = /<!-- project-map:mtime:(\d+) -->/;
+const SCRIPT = path.join(homedir(), ".pi", "agent", "scripts", "project-map.mjs");
 
 function findMap(cwd: string): string | null {
   let dir = path.resolve(cwd);
   while (true) {
-    const candidate = path.join(dir, MAP_NAME);
-    if (existsSync(candidate)) return candidate;
+    for (const name of [MAP_NAME, LEGACY_NAME]) {
+      const candidate = path.join(dir, name);
+      if (existsSync(candidate)) return candidate;
+    }
     const parent = path.dirname(dir);
     if (parent === dir) return null;
     dir = parent;
@@ -82,7 +85,7 @@ export default function (pi: ExtensionAPI) {
     }
     const mapPath = findMap(ctx.cwd);
     if (!mapPath && ctx.hasUI && looksLikeProject(ctx.cwd)) {
-      ctx.ui.notify("此项目还没有代码地图，输入 /map 生成 CODEBASE.md", "warn");
+      ctx.ui.notify("此项目还没有项目空间地图，输入 /map 生成 PROJECT_MAP.md", "warn");
     }
   });
 
@@ -108,13 +111,13 @@ export default function (pi: ExtensionAPI) {
       truncated = true;
     }
     const guide = [
-      `<!-- codebase-map:mtime:${mtime} -->`,
+      `<!-- project-map:mtime:${mtime} -->`,
       "",
-      "【项目代码地图】根目录有 CODEBASE.md，全文如下。先据此建立全局认知：",
+      "【项目空间地图】根目录有 PROJECT_MAP.md，全文如下。先据此建立全局认知：",
       "1. 定位文件用本图，需要细节再 read 具体源码；不要每次全量扫仓库",
       "2. 图中没有的细节（函数体、参数、调用链）直接 read 对应文件",
-      "3. 上下文被压缩导致地图丢失时，用 read 重读 CODEBASE.md",
-      "4. 代码大改（增删文件、改架构）后，用 codebase_map 工具刷新地图",
+      "3. 上下文被压缩导致地图丢失时，用 read 重读 PROJECT_MAP.md",
+      "4. 代码大改（增删文件、改架构）后，用 project_map 工具刷新地图",
       truncated ? `5. 地图超过 ${MAX_INJECT_BYTES} 字节已截断，按需 read 剩余部分` : "",
       "",
       content,
@@ -122,11 +125,11 @@ export default function (pi: ExtensionAPI) {
       .filter(Boolean)
       .join("\n");
     injectedMtime = mtime;
-    return { message: { customType: "codebase-map", content: guide, display: true } };
+    return { message: { customType: "project-map", content: guide, display: true } };
   });
 
   pi.registerCommand("map", {
-    description: "生成或刷新当前项目的 CODEBASE.md 代码地图",
+    description: "生成或刷新当前项目的 PROJECT_MAP.md 项目空间地图",
     handler: async (args, ctx) => {
       const target = args?.trim() ? path.resolve(ctx.cwd, args.trim()) : ctx.cwd;
       const { ok, output } = runGenerator(target);
@@ -140,10 +143,10 @@ export default function (pi: ExtensionAPI) {
   });
 
   pi.registerTool({
-    name: "codebase_map",
+    name: "project_map",
     label: "Codebase Map",
     description:
-      "检查、生成或刷新项目根目录的 CODEBASE.md 代码地图（项目结构 + 源码符号摘要）。" +
+      "检查、生成或刷新项目根目录的 PROJECT_MAP.md 项目空间地图（项目结构 + 源码符号摘要）。" +
       "用它替代全量扫描源码：进入没有地图的项目先 generate；大改代码后刷新。" +
       "地图注入由全局扩展自动完成，本工具只在需要显式检查或刷新时调用。",
     parameters: Type.Object({

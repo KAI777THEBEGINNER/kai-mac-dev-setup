@@ -83,6 +83,13 @@
       "target": "~/.local/bin/ghostty-reload"
     },
     {
+      "id": "codex-agents-md",
+      "group": "terminal",
+      "kind": "file",
+      "repo": "codex/AGENTS.md",
+      "target": "~/.codex/AGENTS.md"
+    },
+    {
       "id": "pi-agents-md",
       "group": "terminal",
       "kind": "file",

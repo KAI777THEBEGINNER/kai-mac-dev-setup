@@ -75,6 +75,7 @@ git add -A && git commit -m "Update terminal config"
 | `zellij/` | 0.42 配置：自定义键位、内联金色主题 `gold` | `~/.config/zellij/config.kdl` |
 | `shell/` | `.zshrc`（zellij 单会话自动启动、PATH、Ghidra）、`.zprofile`（brew 镜像） | `~/` |
 | `bin/` | `ghostty-bg`（背景开关）、`ghostty-reload`（热重载）、`ghostty-open-folder`（Finder 入口） | `~/.local/bin/` |
+| `codex/` | 全局行为规则 `AGENTS.md` | `~/.codex/AGENTS.md` |
 | `pi/` | 行为规则 `AGENTS.md`、`settings.json`、`models.json`、快捷键、subagents、主题、6 个 agents、skills、扩展、脚本 | `~/.pi/agent/` |
 | `pii-guard/` | **byted_refined** 脱敏层：正则 + 词表 + 未知人名启发式 | `~/.pi/agent/extensions/pii-guard/` |
 

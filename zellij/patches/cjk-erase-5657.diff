@@ -1,0 +1,229 @@
+diff --git a/zellij-server/src/panes/grid.rs b/zellij-server/src/panes/grid.rs
+index 0c021d4e8d..a7c3e0b081 100644
+--- a/zellij-server/src/panes/grid.rs
++++ b/zellij-server/src/panes/grid.rs
+@@ -6066,16 +6066,18 @@ impl Row {
+         self.width = None;
+     }
+     pub fn position_accounting_for_widechars(&self, x: usize) -> usize {
+-        let mut position = x;
++        self.character_index_and_start_column(x).0
++    }
++    fn character_index_and_start_column(&self, x: usize) -> (usize, usize) {
++        let mut column = 0;
+         for (index, terminal_character) in self.columns.iter().enumerate() {
+-            if index == position {
+-                break;
+-            }
+-            if terminal_character.width() > 1 {
+-                position = position.saturating_sub(terminal_character.width().saturating_sub(1));
++            let character_width = terminal_character.width();
++            if column + character_width > x {
++                return (index, column);
+             }
++            column += character_width;
+         }
+-        position
++        (self.columns.len() + (x - column), x)
+     }
+     pub fn replace_and_pad_end(
+         &mut self,
+@@ -6084,13 +6086,21 @@ impl Row {
+         terminal_character: TerminalCharacter,
+     ) {
+         self.osc133_markers.retain(|marker| marker.column <= from);
+-        let from_position_accounting_for_widechars = self.position_accounting_for_widechars(from);
+-        let to_position_accounting_for_widechars = self.position_accounting_for_widechars(to);
+-        let replacement_length = to_position_accounting_for_widechars
+-            .saturating_sub(from_position_accounting_for_widechars);
++        let (from_index, _) = self.character_index_and_start_column(from);
++        self.columns.truncate(from_index);
++        let retained_width = self.width();
++        if retained_width < from {
++            let mut gap_fill = EMPTY_TERMINAL_CHARACTER;
++            if let Some(bg_color) = self.bg_color {
++                gap_fill
++                    .styles
++                    .update(|styles| styles.background = Some(bg_color));
++            }
++            self.columns
++                .extend(std::iter::repeat(gap_fill).take(from - retained_width));
++        }
++        let replacement_length = to.saturating_sub(self.width());
+         let mut replace_with = VecDeque::from(vec![terminal_character; replacement_length]);
+-        self.columns
+-            .truncate(from_position_accounting_for_widechars);
+         self.columns.append(&mut replace_with);
+         self.width = None;
+     }
+@@ -6123,17 +6133,17 @@ impl Row {
+         drained_part
+     }
+     pub fn replace_and_pad_beginning(&mut self, to: usize, terminal_character: TerminalCharacter) {
+-        let to_position_accounting_for_widechars = self.position_accounting_for_widechars(to);
++        let (to_position_accounting_for_widechars, character_start_column) =
++            self.character_index_and_start_column(to);
+         let width_of_current_character = self
+             .columns
+             .get(to_position_accounting_for_widechars)
+             .map(|character| character.width())
+             .unwrap_or(1);
+-        let replaced_end = to + width_of_current_character;
++        let replaced_end = character_start_column + width_of_current_character;
+         self.osc133_markers
+             .retain(|marker| marker.column >= replaced_end);
+-        let mut replace_with =
+-            VecDeque::from(vec![terminal_character; to + width_of_current_character]);
++        let mut replace_with = VecDeque::from(vec![terminal_character; replaced_end]);
+         if to_position_accounting_for_widechars > self.columns.len() {
+             self.columns.clear();
+         } else if to_position_accounting_for_widechars >= self.columns.len() {
+diff --git a/zellij-server/src/panes/unit/grid_tests.rs b/zellij-server/src/panes/unit/grid_tests.rs
+index 6981a9f3fc..ee68fdc70e 100644
+--- a/zellij-server/src/panes/unit/grid_tests.rs
++++ b/zellij-server/src/panes/unit/grid_tests.rs
+@@ -19,6 +19,119 @@ use zellij_utils::{
+ 
+ use std::fmt::Write;
+ 
++#[test]
++fn erase_line_end_pads_wide_characters_to_display_width() {
++    use crate::panes::grid::Row;
++    use crate::panes::terminal_character::{TerminalCharacter, EMPTY_TERMINAL_CHARACTER};
++
++    for (content, from, to, expected) in [
++        ("ab你cd", 2, 6, "ab    "),
++        ("ab你cd", 3, 6, "ab    "),
++        ("你ab好", 3, 6, "你a   "),
++        ("你好", 0, 6, "      "),
++        ("ab", 4, 6, "ab    "),
++    ] {
++        let mut row = Row::from_columns(
++            content
++                .chars()
++                .map(|character| TerminalCharacter::new_styled(character, Default::default()))
++                .collect(),
++        );
++        row.replace_and_pad_end(from, to, EMPTY_TERMINAL_CHARACTER);
++        assert_eq!(row.width_cached(), to, "content={content:?}, from={from}");
++        assert_eq!(
++            row.columns
++                .iter()
++                .map(|cell| cell.character)
++                .collect::<String>(),
++            expected,
++        );
++    }
++}
++
++fn row_from_str(content: &str) -> crate::panes::grid::Row {
++    use crate::panes::terminal_character::TerminalCharacter;
++    crate::panes::grid::Row::from_columns(
++        content
++            .chars()
++            .map(|character| TerminalCharacter::new_styled(character, Default::default()))
++            .collect(),
++    )
++}
++
++fn row_to_string(row: &crate::panes::grid::Row) -> String {
++    row.columns.iter().map(|cell| cell.character).collect()
++}
++
++#[test]
++fn erase_line_end_from_second_half_of_wide_character_before_another_wide_character() {
++    use crate::panes::terminal_character::EMPTY_TERMINAL_CHARACTER;
++
++    for (content, from, to, expected) in [
++        ("ab你c好", 3, 8, "ab      "),
++        ("ab你c好", 2, 8, "ab      "),
++        ("ab你c好", 5, 8, "ab你c   "),
++        ("你好你好", 3, 8, "你      "),
++    ] {
++        let mut row = row_from_str(content);
++        row.replace_and_pad_end(from, to, EMPTY_TERMINAL_CHARACTER);
++        assert_eq!(row.width_cached(), to, "content={content:?}, from={from}");
++        assert_eq!(
++            row_to_string(&row),
++            expected,
++            "content={content:?}, from={from}"
++        );
++    }
++}
++
++#[test]
++fn erase_line_end_past_row_end_styles_only_cells_from_cursor() {
++    use crate::panes::terminal_character::{AnsiCode, EMPTY_TERMINAL_CHARACTER};
++
++    let mut erase_character = EMPTY_TERMINAL_CHARACTER;
++    erase_character
++        .styles
++        .update(|styles| styles.background = Some(AnsiCode::ColorIndex(1)));
++
++    let mut row = row_from_str("ab");
++    row.replace_and_pad_end(4, 6, erase_character.clone());
++
++    assert_eq!(row.width_cached(), 6);
++    assert_eq!(row_to_string(&row), "ab    ");
++    assert!(row
++        .columns
++        .range(2..4)
++        .all(|cell| *cell == EMPTY_TERMINAL_CHARACTER));
++    assert!(row.columns.range(4..6).all(|cell| *cell == erase_character));
++}
++
++#[test]
++fn erase_line_start_through_wide_character_keeps_row_width() {
++    use crate::panes::terminal_character::EMPTY_TERMINAL_CHARACTER;
++
++    for (content, to, expected) in [
++        ("ab你c好", 2, "    c好"),
++        ("ab你c好", 3, "    c好"),
++        ("ab你c好", 4, "     好"),
++        ("你好你好", 3, "    你好"),
++        ("ab", 0, " b"),
++    ] {
++        let mut row = row_from_str(content);
++        let original_width = row.width();
++        row.replace_and_pad_beginning(to, EMPTY_TERMINAL_CHARACTER);
++        assert_eq!(
++            row.width_cached(),
++            original_width,
++            "content={content:?}, to={to}"
++        );
++        assert_eq!(
++            row_to_string(&row),
++            expected,
++            "content={content:?}, to={to}"
++        );
++    }
++}
++
+ fn read_fixture(fixture_name: &str) -> Vec<u8> {
+     let mut path_to_file = std::path::PathBuf::new();
+     path_to_file.push("../src");
+diff --git a/zellij-server/src/panes/unit/snapshots/zellij_server__panes__grid__grid_tests__bash_delete_wide_characters.snap b/zellij-server/src/panes/unit/snapshots/zellij_server__panes__grid__grid_tests__bash_delete_wide_characters.snap
+index 92e3c637d0..00c797aa07 100644
+--- a/zellij-server/src/panes/unit/snapshots/zellij_server__panes__grid__grid_tests__bash_delete_wide_characters.snap
++++ b/zellij-server/src/panes/unit/snapshots/zellij_server__panes__grid__grid_tests__bash_delete_wide_characters.snap
+@@ -1,11 +1,11 @@
+ ---
+ source: zellij-server/src/panes/./unit/grid_tests.rs
+-assertion_line: 875
++assertion_line: 1386
+ expression: "format!(\"{:?}\", grid)"
+ ---
+ 00 (C): Welcome to fish, the friendly interactive shell                                                         
+ 01 (C): ⋊> ~/c/zellij on wide-char ⨯ bash                                                               15:35:20
+-02 (C): [aram@green zellij]$ ＨＨＨＨＨＨ                                                                      
++02 (C): [aram@green zellij]$ ＨＨＨＨＨＨ                                                                       
+ 03 (C): 
+ 04 (C): 
+ 05 (C): 
+@@ -23,5 +23,4 @@ expression: "format!(\"{:?}\", grid)"
+ 17 (C): 
+ 18 (C): 
+ 19 (C): 
+-20 (C): 
+-
++20 (C):

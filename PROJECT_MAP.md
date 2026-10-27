@@ -1,6 +1,6 @@
-# CODEBASE.md —— kai-mac-dev-setup 代码地图
+# PROJECT_MAP.md —— kai-mac-dev-setup 项目空间地图
 
-> 自动生成于 2026-10-21 20:53（pi codebase-map）。改动代码后运行 `/map` 刷新。
+> 项目地图根据当前同步配置维护；改动代码后刷新。
 > 用法：先读本图建立全局认知，再按需 read 具体文件；不要每次全量扫仓库。
 
 ## 总览
@@ -36,6 +36,7 @@
 
 - `README.md`
 - `THIRD_PARTY.md`
+- `codex/AGENTS.md` —— 同步至 `~/.codex/AGENTS.md`。
 - `pi/AGENTS.md`
 - `pi/USER-GUIDE.md`
 - `pi/agents/build-error-resolver.md`
@@ -74,14 +75,14 @@
 ### pi/extensions/
 - `session-title.ts` —— Session Title — 语义总结任务内容作为会话标题 （符号：STATUS_KEY、TITLE_MAX、CONVERSATION_BUDGET、PER_MESSAGE_CAP、DEBOUNCE_MS、GEN_TIMEOUT_MS、extractText、extractToolNames、buildConversationText、fingerprint、cleanTitle、buildTitlePrompt）
 - `preannounce-guard.ts` —— 预告守卫（Preannounce Guard）—— Pi 全局扩展 作用：拦住那些会打扰用户的 shell 命令，在执行前先让「预告」刘海 toast 倒数 3 秒。 为什么需要它：AI 可能忘记先问用户，这类命令一旦执行，用户的前台就被抢了 —— 这是机械兜底。 安装：把本文件 （符号：BIN、MODE、MAX_MESSAGE、MUTATING_WEBRIDGE_ACTIONS、INTERACTIVE_CAPTURE、clip、describeOpenTarget、detect、runAnnounce、preannounceGuard）
-- `codebase-map.ts` —— codebase-map —— pi 扩展：项目代码地图自动注入 + 维护命令 （符号：MAP_NAME、MAX_INJECT_BYTES、MTIME_TAG、SCRIPT、findMap、runGenerator、looksLikeProject）
+- `project-map.ts` —— project-map —— pi 扩展：项目代码地图自动注入 + 维护命令 （符号：MAP_NAME、MAX_INJECT_BYTES、MTIME_TAG、SCRIPT、findMap、runGenerator、looksLikeProject）
 
 ### pi/extensions/plan-mode/
 - `utils.ts` —— Pure utility functions for plan mode. Extracted for testability. （符号：DESTRUCTIVE_PATTERNS、SAFE_PATTERNS、isSafeCommand、TodoItem、cleanStepText、extractTodoItems、extractDoneSteps、markCompletedSteps）
 - `index.ts` —— Plan Mode Extension Read-only exploration mode for safe code analysis. When enabled, built-in write tools are disabled. Features: - /plan co （符号：PLAN_MODE_TOOLS、NORMAL_MODE_TOOLS、PLAN_MODE_DISABLED_TOOLS、PLAN_MANAGED_TOOLS、isAssistantMessage、getTextContent、planModeExtension）
 
 ### pi/scripts/
-- `codebase-map.mjs` —— codebase-map —— 为项目生成 CODEBASE.md 代码地图（pi 上下文资产） （符号：__dirname、MAX_MAP_BYTES、MAX_FILES、MAX_SYMBOLS_PER_FILE、MAX_TREE_ENTRIES、MAX_TREE_DEPTH、IGNORE_DIRS、IGNORE_FILES、BINARY_EXTS、SOURCE_EXTS、DOC_EXTS、SYMBOL_RULES、ruleFor、walk、extractSymbols）
+- `project-map.mjs` —— project-map —— 为项目生成 PROJECT_MAP.md 代码地图（pi 上下文资产） （符号：__dirname、MAX_MAP_BYTES、MAX_FILES、MAX_SYMBOLS_PER_FILE、MAX_TREE_ENTRIES、MAX_TREE_DEPTH、IGNORE_DIRS、IGNORE_FILES、BINARY_EXTS、SOURCE_EXTS、DOC_EXTS、SYMBOL_RULES、ruleFor、walk、extractSymbols）
 - `md2pdf.py` —— -*- coding: utf-8 -*- Markdown -> PDF（纯本地，无浏览器、无 LaTeX） （符号：inline、h2_flowable、split_row、col_widths、_old_col_widths、parse、build）
 - `openrouter_toggle.py` —— openrouter 凭证开关 —— 让 /model 列表里的 openrouter 模型整体出现或消失。 （符号：acquire_lock、read_json、atomic_write、cmd_off、cmd_on、cmd_status、main）
 - `volc_vc_transcribe.py` —— 火山引擎录音文件识别 2.0 极速版批量转写 —— 音频目录 → 带时间戳逐字稿(md) （符号：load_creds、recognize、fmt_ts、write_md、collect_audio、main）
@@ -121,6 +122,12 @@
 
 `LICENSE`、`bin/ghostty-bg`、`bin/ghostty-reload`、`ghostty/background.conf`、`ghostty/config`、`ghostty/custom_shader/bettercrt.glsl`、`ghostty/custom_shader/cursor_blaze.glsl`、`ghostty/custom_shader/starfield.glsl`、`ghostty/custom_shader/starfield_downloaded.glsl`、`ghostty/shaders/shader.glsl`、`manifest.json`、`pi/extensions/pi-computer-use.json`、`pi/keybindings.json`、`pi/models.json`、`pi/patches/v1-bar-jump-已禁用/interactive-mode.js.kpatch`、`pi/patches/v1-bar-jump-已禁用/tui-alt-screen.js.kpatch`、`pi/patches/v1-bar-jump-已禁用/user-message.js.kpatch`、`pi/patches/v2-jump-2026-08-23-assistant-message.js.kpatch`、`pi/patches/v2-jump-2026-08-23-keybindings.js.kpatch`、`pi/patches/v2-jump-2026-08-23-tui-alt-screen.js.kpatch`、`pi/patches/v2-jump-2026-08-23-user-message.js.kpatch`、`pi/pi-dsh-minimal.json`、`pi/settings.json`、`pi/skills/agent-webbridge/tools.json`、`pi/skills/human-writing/LICENSE`、`pi/skills/human-writing/VERSION`、`pi/skills/human-writing/agents/openai.yaml`、`pi/skills/lieflat-charts/LICENSE`、`pi/skills/lieflat-charts/agents/openai.yaml`、`pi/skills/lieflat-charts/examples/lenny-2026-survey.html`、`pi/skills/lieflat-charts/templates/basics-gallery.html`、`pi/skills/lieflat-charts/templates/big-circular.html`、`pi/skills/lieflat-charts/templates/big-force.html`、`pi/skills/lieflat-charts/templates/big-threads.html`、`pi/skills/lieflat-charts/templates/color/basics-palm.html`、`pi/skills/lieflat-charts/templates/color/basics-porcelain.html`、`pi/skills/lieflat-charts/templates/color/basics-wire.html`、`pi/skills/lieflat-charts/templates/color/big-circular-palm.html`、`pi/skills/lieflat-charts/templates/color/big-circular-porcelain.html`、`pi/skills/lieflat-charts/templates/color/big-force-palm.html`（共 57 个，仅列前 40）
 
+## 终端修复补充（2026-10-25）
+
+- `zellij/patches/cjk-erase-5657.diff`：上游 PR #5657 的 grid 修复和回归测试，回移到本机 0.45.1；修复中文行尾背景填充不足。
+- `zellij/patches/README.md`：根因、上游来源、复现方法及本机安装说明。
+- 本机 `~/.local/bin/zellij` 指向 `~/.local/lib/zellij/0.45.1-cjk5657/zellij`，新服务使用修复版；Homebrew 原版保留。隔离终端验证背景覆盖从 51/68 格恢复到 68/68 格。
+
 ## Finder 文件夹入口（2026-10-26）
 
 - `finder/直接在Ghostty中打开.workflow` → `~/Library/Services/`，接收文件夹的 Finder 快速操作。
@@ -128,6 +135,8 @@
 - `manifest.json` 包含上述两个同步项。
 - Finder 菜单注册必须包含 `NSRequiredContext = {}`，否则服务会进入缓存但默认不显示。
 - 本机已启用 `pbs` 中该项的 `presentation_modes.ContextMenu`，刷新 Finder 后实测「文件夹右键 → Quick Actions → 直接在Ghostty中打开」可见；顶栏 Services 可见不能代替右键验证。
+- AI 前台操作先调用 `~/Applications/预告.app/Contents/MacOS/Preannounce`，仅退出码 0 继续；Codex 长期规则已同步到 `~/.codex/AGENTS.md`，参照 Pi 的 `memory/preannounce.md`。
+- 2026-10-26：已弃用的 `~/Library/Services/PDF压缩体积.workflow` 移至废纸篓，并移除其 Services 显示偏好。预告默认使用短句「会抢占焦点」，已保存到 Codex 全局规则。
 
 ## Ghostty 配置核对（2026-10-26）
 
