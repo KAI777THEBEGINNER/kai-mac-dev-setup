@@ -60,6 +60,6 @@
 
 ## 工具（用前先读对应 skill/memory）
 
-- 真实浏览器 + 登录态（赛氪、知网、报名系统）→ `agent-webbridge` skill；驱动真实网页表单前先看 `memory/pi-computer-use.md` 末段四个坑
+- 真实浏览器 + 登录态→ `agent-webbridge` skill；驱动真实网页表单前先看 `memory/pi-computer-use.md` 末段四个坑
 - 会抢前台、鼠标或键盘的操作与测试 → 必须先预告，纪律见 `memory/preannounce.md`
 - 回答页面（answer-me-with-html）：**默认不出页**，只有结构关系、≥3 选项 × ≥3 维度对比、真实数据、用户点名才出；一律 `--no-open`，回复末行给 `file://` 链接。判定细节见 `memory/feedback_html_page_threshold.md`
